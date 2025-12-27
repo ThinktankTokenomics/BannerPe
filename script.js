@@ -106,6 +106,37 @@ const mockListings = [
     }
 ];
 
+
+// Save wallet connection state
+function saveWalletState(address) {
+    localStorage.setItem('bannerSpace_walletConnected', 'true');
+    localStorage.setItem('bannerSpace_walletAddress', address);
+    localStorage.setItem('bannerSpace_lastConnection', Date.now());
+}
+
+// Clear wallet state
+function clearWalletState() {
+    localStorage.removeItem('bannerSpace_walletConnected');
+    localStorage.removeItem('bannerSpace_walletAddress');
+    localStorage.removeItem('bannerSpace_lastConnection');
+}
+
+// Check saved wallet state
+function checkSavedWalletState() {
+    const isConnected = localStorage.getItem('bannerSpace_walletConnected');
+    const address = localStorage.getItem('bannerSpace_walletAddress');
+    const lastConnection = localStorage.getItem('bannerSpace_lastConnection');
+    
+    // If connection was less than 5 minutes ago, try to reconnect
+    if (isConnected === 'true' && address && lastConnection) {
+        const fiveMinutesAgo = Date.now() - (5 * 60 * 1000);
+        if (parseInt(lastConnection) > fiveMinutesAgo) {
+            return address;
+        }
+    }
+    return null;
+}
+
 // Global Web3 instance (will be set by web3.js)
 let bannerSpaceWeb3 = null;
 
