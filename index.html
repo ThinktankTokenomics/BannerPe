@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BannerSpace - Rent Twitter Banners</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-container">
+                <!-- Logo -->
+                <div class="logo" onclick="window.location.href='index.html'">
+                    <div class="logo-icon">
+                        <i class="fab fa-twitter"></i>
+                    </div>
+                    <span class="logo-text">
+                        <span class="gradient-text">Banner</span>Space
+                    </span>
+                </div>
+
+                <!-- Desktop Menu -->
+                <div class="nav-menu">
+                    <a href="index.html" class="nav-link active">Home</a>
+                    <a href="marketplace.html" class="nav-link">Marketplace</a>
+                    <a href="dashboard.html" class="nav-link">Dashboard</a>
+                    <a href="#" class="nav-link">How it Works</a>
+                    <a href="#" class="nav-link">Creators</a>
+                </div>
+
+                <!-- Actions -->
+                <div class="nav-actions">
+                    <button class="btn-notification">
+                        <i class="fas fa-bell"></i>
+                    </button>
+                    <button class="btn-wallet" id="connectWallet">
+                        <i class="fas fa-wallet"></i>
+                        <span id="walletText">Connect Wallet</span>
+                    </button>
+                    <button class="btn-twitter">
+                        <i class="fab fa-twitter"></i>
+                        Connect Twitter
+                    </button>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <button class="menu-toggle" id="menuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+
+            <!-- Mobile Menu -->
+            <div class="mobile-menu" id="mobileMenu">
+                <a href="index.html" class="mobile-link active">Home</a>
+                <a href="marketplace.html" class="mobile-link">Marketplace</a>
+                <a href="dashboard.html" class="mobile-link">Dashboard</a>
+                <a href="#" class="mobile-link">How it Works</a>
+                <a href="#" class="mobile-link">Creators</a>
+                <div class="mobile-actions">
+                    <button class="btn-wallet mobile-btn">
+                        <i class="fas fa-wallet"></i>
+                        Connect Wallet
+                    </button>
+                    <button class="btn-twitter mobile-btn">
+                        <i class="fab fa-twitter"></i>
+                        Connect Twitter
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <div class="badge">
+                    <i class="fas fa-shield-alt"></i>
+                    Decentralized & Trustless
+                </div>
+                
+                <h1 class="hero-title">
+                    <span class="gradient-text">Monetize</span> Your<br>
+                    Twitter Banner Space
+                </h1>
+                
+                <p class="hero-subtitle">
+                    Turn idle pixels into passive income. Rent your Twitter banner to advertisers
+                    and get paid automatically with verified on-chain payments.
+                </p>
+                
+                <div class="hero-buttons">
+                    <button class="btn-primary" onclick="window.location.href='marketplace.html'">
+                        Start Earning
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                    <button class="btn-secondary" onclick="window.location.href='marketplace.html'">
+                        Browse Marketplace
+                    </button>
+                </div>
+                
+                <!-- Stats -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value gradient-text">$45K+</div>
+                        <div class="stat-label">Paid to Creators</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value gradient-text">2.3K+</div>
+                        <div class="stat-label">Active Listings</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value gradient-text">100%</div>
+                        <div class="stat-label">Verified Payments</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value gradient-text">99.2%</div>
+                        <div class="stat-label">Uptime</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="container">
+            <h2 class="section-title">Why Choose BannerSpace?</h2>
+            <p class="section-subtitle">Built on blockchain for transparency, automated with smart contracts for efficiency</p>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon" style="background: linear-gradient(135deg, #8B5CF6, #EC4899);">
+                        <i class="fas fa-shield-check"></i>
+                    </div>
+                    <h3>Trustless Payments</h3>
+                    <p>Smart contracts hold funds and release automatically when banners are verified live.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon" style="background: linear-gradient(135deg, #3B82F6, #06B6D4);">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <h3>Real-time Verification</h3>
+                    <p>Our oracle network checks banner status every hour. Payments only for verified displays.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon" style="background: linear-gradient(135deg, #10B981, #84CC16);">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3>Dynamic Pricing</h3>
+                    <p>Set your own rates based on followers, engagement, and demand.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon" style="background: linear-gradient(135deg, #F59E0B, #EF4444);">
+                        <i class="fas fa-handshake"></i>
+                    </div>
+                    <h3>No Middleman</h3>
+                    <p>Direct creator-to-advertiser marketplace with minimal fees.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Marketplace Preview -->
+    <section class="marketplace-preview">
+        <div class="container">
+            <div class="section-header">
+                <div>
+                    <h2 class="section-title">Featured Listings</h2>
+                    <p class="section-subtitle">Top creators earning with their banner space</p>
+                </div>
+                <button class="btn-primary" onclick="window.location.href='marketplace.html'">
+                    View All
+                    <i class="fas fa-external-link-alt"></i>
+                </button>
+            </div>
+            
+            <div class="listings-grid" id="featuredListings">
+                <!-- Listings will be loaded by JavaScript -->
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="how-it-works">
+        <div class="container">
+            <h2 class="section-title">How It Works</h2>
+            <p class="section-subtitle">Simple four-step process from setup to automatic payments</p>
+            
+            <div class="steps-container">
+                <div class="step-line"></div>
+                
+                <div class="steps-grid">
+                    <div class="step">
+                        <div class="step-circle" style="background: linear-gradient(135deg, #8B5CF6, #EC4899);">
+                            <div class="step-inner">
+                                <i class="fas fa-user-plus"></i>
+                                <div class="step-number">1</div>
+                            </div>
+                        </div>
+                        <h3>Connect Accounts</h3>
+                        <p>Link your Twitter and crypto wallet. Takes 2 minutes.</p>
+                    </div>
+                    
+                    <div class="step">
+                        <div class="step-circle" style="background: linear-gradient(135deg, #3B82F6, #06B6D4);">
+                            <div class="step-inner">
+                                <i class="fas fa-upload"></i>
+                                <div class="step-number">2</div>
+                            </div>
+                        </div>
+                        <h3>List Your Banner</h3>
+                        <p>Set your daily rate. We handle the technical setup.</p>
+                    </div>
+                    
+                    <div class="step">
+                        <div class="step-circle" style="background: linear-gradient(135deg, #10B981, #84CC16);">
+                            <div class="step-inner">
+                                <i class="fas fa-dollar-sign"></i>
+                                <div class="step-number">3</div>
+                            </div>
+                        </div>
+                        <h3>Get Paid</h3>
+                        <p>Advertisers pay upfront. Funds locked in smart contract.</p>
+                    </div>
+                    
+                    <div class="step">
+                        <div class="step-circle" style="background: linear-gradient(135deg, #F59E0B, #EAB308);">
+                            <div class="step-inner">
+                                <i class="fas fa-check-circle"></i>
+                                <div class="step-number">4</div>
+                            </div>
+                        </div>
+                        <h3>Auto-Verification</h3>
+                        <p>System checks banner hourly. Payments released automatically.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <div class="logo">
+                        <div class="logo-icon">
+                            <i class="fab fa-twitter"></i>
+                        </div>
+                        <span class="logo-text">
+                            <span class="gradient-text">Banner</span>Space
+                        </span>
+                    </div>
+                    <p class="footer-description">
+                        Decentralized marketplace for Twitter banner advertising.
+                    </p>
+                </div>
+                
+                <div class="footer-links">
+                    <div class="footer-column">
+                        <h4>Product</h4>
+                        <a href="#">Marketplace</a>
+                        <a href="#">For Creators</a>
+                        <a href="#">For Advertisers</a>
+                        <a href="#">Pricing</a>
+                    </div>
+                    
+                    <div class="footer-column">
+                        <h4>Company</h4>
+                        <a href="#">About</a>
+                        <a href="#">Blog</a>
+                        <a href="#">Careers</a>
+                        <a href="#">Contact</a>
+                    </div>
+                    
+                    <div class="footer-column">
+                        <h4>Legal</h4>
+                        <a href="#">Privacy Policy</a>
+                        <a href="#">Terms of Service</a>
+                        <a href="#">Cookie Policy</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2024 BannerSpace. All rights reserved.</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-discord"></i></a>
+                    <a href="#"><i class="fab fa-github"></i></a>
+                    <a href="#"><i class="fab fa-telegram"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
