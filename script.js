@@ -1,5 +1,24 @@
 // Main JavaScript file for BannerSpace
-
+// Quick fix: Check for MetaMask connection on page load
+window.addEventListener('load', function() {
+    setTimeout(async () => {
+        if (typeof window.ethereum !== 'undefined') {
+            try {
+                const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+                if (accounts.length > 0 && typeof BannerSpaceWeb3 !== 'undefined') {
+                    if (!bannerSpaceWeb3) {
+                        bannerSpaceWeb3 = new BannerSpaceWeb3();
+                        window.bannerSpaceWeb3 = bannerSpaceWeb3;
+                    }
+                    await bannerSpaceWeb3.init();
+                    updateUIForConnectedWallet();
+                }
+            } catch (error) {
+                console.log('Auto-connect check failed:', error);
+            }
+        }
+    }, 1000);
+});
 // Mock data for listings (fallback)
 const mockListings = [
     {
