@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
+
+    
 <body>
     <!-- Navigation -->
     <nav class="navbar">
@@ -306,5 +308,75 @@
     <div class="toast" id="toast"></div>
 
     <script src="script.js"></script>
+
+    <!-- MetaMask Modal -->
+<div class="modal" id="metamaskModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Connect Wallet</h2>
+            <button class="modal-close" onclick="closeMetamaskModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="wallet-options">
+                <button class="wallet-option" onclick="connectMetamask()">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg" alt="MetaMask">
+                    <div>
+                        <h3>MetaMask</h3>
+                        <p>Connect to your MetaMask Wallet</p>
+                    </div>
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+                
+                <button class="wallet-option" onclick="connectWalletConnect()">
+                    <img src="https://walletconnect.org/_next/static/media/logo_mark.84dd8525.svg" alt="WalletConnect">
+                    <div>
+                        <h3>WalletConnect</h3>
+                        <p>Scan QR code with mobile wallet</p>
+                    </div>
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+            
+            <div class="network-info" id="networkInfo" style="display: none;">
+                <h4>Connected Network:</h4>
+                <p id="currentNetwork">Not connected</p>
+                <button class="btn-secondary" onclick="switchToSepolia()">
+                    Switch to Sepolia Testnet
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Transaction Modal -->
+<div class="modal" id="transactionModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Transaction</h2>
+            <button class="modal-close" onclick="closeTransactionModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div id="txStatus">
+                <div class="loading-spinner"></div>
+                <p>Processing transaction...</p>
+            </div>
+            <div id="txResult" style="display: none;">
+                <div class="tx-success">
+                    <i class="fas fa-check-circle"></i>
+                    <h3>Transaction Successful!</h3>
+                    <p id="txMessage"></p>
+                    <a href="#" id="txLink" target="_blank" class="btn-outline">
+                        <i class="fas fa-external-link-alt"></i>
+                        View on Explorer
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 </body>
 </html>
