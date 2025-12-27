@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - BannerSpace</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-container">
+                <div class="logo" onclick="window.location.href='index.html'">
+                    <div class="logo-icon">
+                        <i class="fab fa-twitter"></i>
+                    </div>
+                    <span class="logo-text">
+                        <span class="gradient-text">Banner</span>Space
+                    </span>
+                </div>
+
+                <div class="nav-menu">
+                    <a href="index.html" class="nav-link">Home</a>
+                    <a href="marketplace.html" class="nav-link">Marketplace</a>
+                    <a href="dashboard.html" class="nav-link active">Dashboard</a>
+                    <a href="#" class="nav-link">How it Works</a>
+                    <a href="#" class="nav-link">Creators</a>
+                </div>
+
+                <div class="nav-actions">
+                    <button class="btn-notification">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge">3</span>
+                    </button>
+                    <button class="btn-wallet" id="connectWallet">
+                        <i class="fas fa-wallet"></i>
+                        <span id="walletText">0x1234...5678</span>
+                    </button>
+                    <button class="btn-twitter">
+                        <i class="fab fa-twitter"></i>
+                        @web3builder
+                    </button>
+                </div>
+
+                <button class="menu-toggle" id="menuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+
+            <div class="mobile-menu" id="mobileMenu">
+                <a href="index.html" class="mobile-link">Home</a>
+                <a href="marketplace.html" class="mobile-link">Marketplace</a>
+                <a href="dashboard.html" class="mobile-link active">Dashboard</a>
+                <a href="#" class="mobile-link">How it Works</a>
+                <a href="#" class="mobile-link">Creators</a>
+                <div class="mobile-actions">
+                    <button class="btn-wallet mobile-btn">
+                        <i class="fas fa-wallet"></i>
+                        Connect Wallet
+                    </button>
+                    <button class="btn-twitter mobile-btn">
+                        <i class="fab fa-twitter"></i>
+                        Connect Twitter
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Dashboard Content -->
+    <section class="dashboard">
+        <div class="container">
+            <!-- Header -->
+            <div class="dashboard-header">
+                <div>
+                    <h1 class="page-title">Dashboard</h1>
+                    <p class="page-subtitle">Welcome back, Sarah! Here's your performance overview.</p>
+                </div>
+                <button class="btn-primary" id="createAdBtn">
+                    <i class="fas fa-plus"></i>
+                    Create New Ad
+                </button>
+            </div>
+
+            <!-- Dashboard Tabs -->
+            <div class="dashboard-tabs">
+                <button class="tab-btn active" data-tab="overview">
+                    <i class="fas fa-chart-bar"></i>
+                    Overview
+                </button>
+                <button class="tab-btn" data-tab="listings">
+                    <i class="fas fa-list"></i>
+                    My Listings
+                </button>
+                <button class="tab-btn" data-tab="ads">
+                    <i class="fas fa-bullhorn"></i>
+                    My Ads
+                </button>
+                <button class="tab-btn" data-tab="earnings">
+                    <i class="fas fa-dollar-sign"></i>
+                    Earnings
+                </button>
+                <button class="tab-btn" data-tab="settings">
+                    <i class="fas fa-cog"></i>
+                    Settings
+                </button>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="dashboard-stats">
+                <div class="stat-card-large">
+                    <div class="stat-header">
+                        <div class="stat-icon" style="background: rgba(16, 185, 129, 0.1);">
+                            <i class="fas fa-dollar-sign" style="color: #10B981;"></i>
+                        </div>
+                        <span class="stat-change positive">+24%</span>
+                    </div>
+                    <div class="stat-value">$2,450</div>
+                    <div class="stat-label">Total Earnings</div>
+                </div>
+                
+                <div class="stat-card-large">
+                    <div class="stat-header">
+                        <div class="stat-icon" style="background: rgba(59, 130, 246, 0.1);">
+                            <i class="fas fa-users" style="color: #3B82F6;"></i>
+                        </div>
+                        <span class="stat-change positive">+1</span>
+                    </div>
+                    <div class="stat-value">3</div>
+                    <div class="stat-label">Active Listings</div>
+                </div>
+                
+                <div class="stat-card-large">
+                    <div class="stat-header">
+                        <div class="stat-icon" style="background: rgba(139, 92, 246, 0.1);">
+                            <i class="fas fa-eye" style="color: #8B5CF6;"></i>
+                        </div>
+                        <span class="stat-change positive">+12%</span>
+                    </div>
+                    <div class="stat-value">45.2K</div>
+                    <div class="stat-label">Impressions</div>
+                </div>
+                
+                <div class="stat-card-large">
+                    <div class="stat-header">
+                        <div class="stat-icon" style="background: rgba(245, 158, 11, 0.1);">
+                            <i class="fas fa-chart-line" style="color: #F59E0B;"></i>
+                        </div>
+                        <span class="stat-change positive">+0.4%</span>
+                    </div>
+                    <div class="stat-value">3.8%</div>
+                    <div class="stat-label">Avg. CTR</div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="dashboard-content">
+                <!-- Left Column -->
+                <div class="dashboard-left">
+                    <!-- Recent Activity -->
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h3>Recent Activity</h3>
+                            <a href="#" class="view-all">View All</a>
+                        </div>
+                        
+                        <div class="activity-list">
+                            <div class="activity-item">
+                                <div class="activity-icon success">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                                <div class="activity-details">
+                                    <div class="activity-title">Payment received for @web3builder</div>
+                                    <div class="activity-time">2 hours ago</div>
+                                </div>
+                                <div class="activity-amount">$100</div>
+                            </div>
+                            
+                            <div class="activity-item">
+                                <div class="activity-icon success">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                                <div class="activity-details">
+                                    <div class="activity-title">Banner verified live</div>
+                                    <div class="activity-time">5 hours ago</div>
+                                </div>
+                            </div>
+                            
+                            <div class="activity-item">
+                                <div class="activity-icon active">
+                                    <i class="fas fa-play-circle"></i>
+                                </div>
+                                <div class="activity-details">
+                                    <div class="activity-title">New ad campaign started</div>
+                                    <div class="activity-time">1 day ago</div>
+                                </div>
+                                <div class="activity-amount">$250</div>
+                            </div>
+                            
+                            <div class="activity-item">
+                                <div class="activity-icon success">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                                <div class="activity-details">
+                                    <div class="activity-title">Payment released to @cryptoguru</div>
+                                    <div class="activity-time">2 days ago</div>
+                                </div>
+                                <div class="activity-amount">$250</div>
+                            </div>
+                            
+                            <div class="activity-item">
+                                <div class="activity-icon warning">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                </div>
+                                <div class="activity-details">
+                                    <div class="activity-title">Verification failed - manual review</div>
+                                    <div class="activity-time">3 days ago</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h3>Quick Actions</h3>
+                        </div>
+                        
+                        <div class="quick-actions">
+                            <button class="quick-action-btn" style="background: linear-gradient(135deg, #8B5CF6, #EC4899);">
+                                <i class="fas fa-dollar-sign"></i>
+                                <span>Create Listing</span>
+                            </button>
+                            
+                            <button class="quick-action-btn" style="background: linear-gradient(135deg, #3B82F6, #06B6D4);">
+                                <i class="fas fa-bullhorn"></i>
+                                <span>Launch Ad</span>
+                            </button>
+                            
+                            <button class="quick-action-btn" style="background: linear-gradient(135deg, #10B981, #84CC16);">
+                                <i class="fas fa-chart-bar"></i>
+                                <span>View Reports</span>
+                            </button>
+                            
+                            <button class="quick-action-btn" style="background: linear-gradient(135deg, #F59E0B, #EAB308);">
+                                <i class="fas fa-cog"></i>
+                                <span>Settings</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column -->
+                <div class="dashboard-right">
+                    <!-- Upcoming Payments -->
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h3>Upcoming Payments</h3>
+                            <a href="#" class="view-all">View All</a>
+                        </div>
+                        
+                        <div class="payments-list">
+                            <div class="payment-item">
+                                <div class="payment-date">
+                                    <i class="fas fa-calendar"></i>
+                                    Tomorrow
+                                </div>
+                                <div class="payment-details">
+                                    <div class="payment-creator">@web3builder</div>
+                                    <div class="payment-status scheduled">Scheduled</div>
+                                </div>
+                                <div class="payment-amount">$100</div>
+                            </div>
+                            
+                            <div class="payment-item">
+                                <div class="payment-date">
+                                    <i class="fas fa-calendar"></i>
+                                    Dec 15
+                                </div>
+                                <div class="payment-details">
+                                    <div class="payment-creator">@techlead</div>
+                                    <div class="payment-status scheduled">Scheduled</div>
+                                </div>
+                                <div class="payment-amount">$150</div>
+                            </div>
+                            
+                            <div class="payment-item">
+                                <div class="payment-date">
+                                    <i class="fas fa-calendar"></i>
+                                    Dec 20
+                                </div>
+                                <div class="payment-details">
+                                    <div class="payment-creator">@ai_researcher</div>
+                                    <div class="payment-status scheduled">Scheduled</div>
+                                </div>
+                                <div class="payment-amount">$200</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Verification Status -->
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h3>Verification Status</h3>
+                        </div>
+                        
+                        <div class="verification-status">
+                            <div class="verification-item">
+                                <span class="verification-label">Last Check</span>
+                                <span class="verification-value">2 hours ago</span>
+                            </div>
+                            
+                            <div class="verification-item">
+                                <span class="verification-label">Success Rate</span>
+                                <span class="verification-value success">98.7%</span>
+                            </div>
+                            
+                            <div class="verification-item">
+                                <span class="verification-label">Next Check</span>
+                                <span class="verification-value">In 22 minutes</span>
+                            </div>
+                            
+                            <div class="verification-divider"></div>
+                            
+                            <div class="verification-summary">
+                                <div class="verification-icon success">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                                <div>
+                                    <div class="verification-title">All systems operational</div>
+                                    <div class="verification-subtitle">Banners verified and payments flowing</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <div class="logo">
+                        <div class="logo-icon">
+                            <i class="fab fa-twitter"></i>
+                        </div>
+                        <span class="logo-text">
+                            <span class="gradient-text">Banner</span>Space
+                        </span>
+                    </div>
+                    <p class="footer-description">
+                        Decentralized marketplace for Twitter banner advertising.
+                    </p>
+                </div>
+                
+                <div class="footer-links">
+                    <div class="footer-column">
+                        <h4>Product</h4>
+                        <a href="#">Marketplace</a>
+                        <a href="#">For Creators</a>
+                        <a href="#">For Advertisers</a>
+                        <a href="#">Pricing</a>
+                    </div>
+                    
+                    <div class="footer-column">
+                        <h4>Company</h4>
+                        <a href="#">About</a>
+                        <a href="#">Blog</a>
+                        <a href="#">Careers</a>
+                        <a href="#">Contact</a>
+                    </div>
+                    
+                    <div class="footer-column">
+                        <h4>Legal</h4>
+                        <a href="#">Privacy Policy</a>
+                        <a href="#">Terms of Service</a>
+                        <a href="#">Cookie Policy</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2024 BannerSpace. All rights reserved.</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-discord"></i></a>
+                    <a href="#"><i class="fab fa-github"></i></a>
+                    <a href="#"><i class="fab fa-telegram"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
