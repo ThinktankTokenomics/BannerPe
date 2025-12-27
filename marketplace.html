@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marketplace - BannerSpace</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation (same as index.html) -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-container">
+                <div class="logo" onclick="window.location.href='index.html'">
+                    <div class="logo-icon">
+                        <i class="fab fa-twitter"></i>
+                    </div>
+                    <span class="logo-text">
+                        <span class="gradient-text">Banner</span>Space
+                    </span>
+                </div>
+
+                <div class="nav-menu">
+                    <a href="index.html" class="nav-link">Home</a>
+                    <a href="marketplace.html" class="nav-link active">Marketplace</a>
+                    <a href="dashboard.html" class="nav-link">Dashboard</a>
+                    <a href="#" class="nav-link">How it Works</a>
+                    <a href="#" class="nav-link">Creators</a>
+                </div>
+
+                <div class="nav-actions">
+                    <button class="btn-notification">
+                        <i class="fas fa-bell"></i>
+                    </button>
+                    <button class="btn-wallet" id="connectWallet">
+                        <i class="fas fa-wallet"></i>
+                        <span id="walletText">Connect Wallet</span>
+                    </button>
+                    <button class="btn-twitter">
+                        <i class="fab fa-twitter"></i>
+                        Connect Twitter
+                    </button>
+                </div>
+
+                <button class="menu-toggle" id="menuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+
+            <div class="mobile-menu" id="mobileMenu">
+                <a href="index.html" class="mobile-link">Home</a>
+                <a href="marketplace.html" class="mobile-link active">Marketplace</a>
+                <a href="dashboard.html" class="mobile-link">Dashboard</a>
+                <a href="#" class="mobile-link">How it Works</a>
+                <a href="#" class="mobile-link">Creators</a>
+                <div class="mobile-actions">
+                    <button class="btn-wallet mobile-btn">
+                        <i class="fas fa-wallet"></i>
+                        Connect Wallet
+                    </button>
+                    <button class="btn-twitter mobile-btn">
+                        <i class="fab fa-twitter"></i>
+                        Connect Twitter
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Marketplace Content -->
+    <section class="marketplace">
+        <div class="container">
+            <!-- Header -->
+            <div class="marketplace-header">
+                <div>
+                    <h1 class="page-title">Marketplace</h1>
+                    <p class="page-subtitle">Browse and rent banner space from top Twitter creators</p>
+                </div>
+                <button class="btn-primary" id="createListingBtn">
+                    <i class="fas fa-plus"></i>
+                    Create Listing
+                </button>
+            </div>
+
+            <!-- Search and Filters -->
+            <div class="marketplace-controls">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Search creators, topics, or keywords...">
+                </div>
+                
+                <div class="filter-controls">
+                    <div class="filter-dropdown">
+                        <button class="filter-btn">
+                            <i class="fas fa-filter"></i>
+                            Filter
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="filter-dropdown">
+                        <button class="filter-btn">
+                            <i class="fas fa-chart-line"></i>
+                            Sort By
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filter Chips -->
+            <div class="filter-chips">
+                <button class="filter-chip active" data-filter="all">All Listings</button>
+                <button class="filter-chip" data-filter="verified">Verified Only</button>
+                <button class="filter-chip" data-filter="affordable">Under $100/day</button>
+                <button class="filter-chip" data-filter="premium">Premium ($500+)</button>
+                <button class="filter-chip" data-filter="available">Available Now</button>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="stats-cards">
+                <div class="stat-card-small">
+                    <div class="stat-icon">
+                        <i class="fas fa-users" style="color: #8B5CF6;"></i>
+                    </div>
+                    <div>
+                        <div class="stat-value">2,347</div>
+                        <div class="stat-label">Active Listings</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card-small">
+                    <div class="stat-icon">
+                        <i class="fas fa-eye" style="color: #3B82F6;"></i>
+                    </div>
+                    <div>
+                        <div class="stat-value">15.2M</div>
+                        <div class="stat-label">Daily Impressions</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card-small">
+                    <div class="stat-icon">
+                        <i class="fas fa-chart-line" style="color: #10B981;"></i>
+                    </div>
+                    <div>
+                        <div class="stat-value">3.8%</div>
+                        <div class="stat-label">Avg. CTR</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card-small">
+                    <div class="stat-icon">
+                        <i class="fas fa-bullhorn" style="color: #F59E0B;"></i>
+                    </div>
+                    <div>
+                        <div class="stat-value">892</div>
+                        <div class="stat-label">Active Advertisers</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Listings Grid -->
+            <div class="listings-container">
+                <div class="listings-grid" id="listingsGrid">
+                    <!-- Listings loaded by JavaScript -->
+                </div>
+                
+                <div class="loading" id="loading">
+                    <div class="loading-spinner"></div>
+                    <p>Loading more listings...</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Create Listing Modal -->
+    <div class="modal" id="createModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Create New Listing</h2>
+                <button class="modal-close" id="closeModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="modal-body">
+                <form id="listingForm">
+                    <div class="form-group">
+                        <label for="dailyPrice">Daily Price (USD)</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-dollar-sign"></i>
+                            <input type="number" id="dailyPrice" min="1" max="10000" value="100" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="bannerPreview">Banner Preview</label>
+                        <div class="banner-preview" id="bannerPreview">
+                            <div class="banner-placeholder">
+                                <i class="fas fa-image"></i>
+                                <p>Your Twitter Banner (1500×500)</p>
+                                <button type="button" class="btn-secondary">
+                                    Upload Custom Preview
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="description">Description (Optional)</label>
+                        <textarea id="description" rows="3" placeholder="Describe your audience, niche, or any requirements..."></textarea>
+                    </div>
+                    
+                    <div class="form-checkbox">
+                        <input type="checkbox" id="autoVerify" checked>
+                        <label for="autoVerify">Enable automatic verification</label>
+                    </div>
+                    
+                    <div class="form-checkbox">
+                        <input type="checkbox" id="instantPayments" checked>
+                        <label for="instantPayments">Enable instant payments</label>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="btn-secondary" id="cancelModal">Cancel</button>
+                <button class="btn-primary" id="submitListing">
+                    <i class="fas fa-check"></i>
+                    Create Listing
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <div class="logo">
+                        <div class="logo-icon">
+                            <i class="fab fa-twitter"></i>
+                        </div>
+                        <span class="logo-text">
+                            <span class="gradient-text">Banner</span>Space
+                        </span>
+                    </div>
+                    <p class="footer-description">
+                        Decentralized marketplace for Twitter banner advertising.
+                    </p>
+                </div>
+                
+                <div class="footer-links">
+                    <div class="footer-column">
+                        <h4>Product</h4>
+                        <a href="#">Marketplace</a>
+                        <a href="#">For Creators</a>
+                        <a href="#">For Advertisers</a>
+                        <a href="#">Pricing</a>
+                    </div>
+                    
+                    <div class="footer-column">
+                        <h4>Company</h4>
+                        <a href="#">About</a>
+                        <a href="#">Blog</a>
+                        <a href="#">Careers</a>
+                        <a href="#">Contact</a>
+                    </div>
+                    
+                    <div class="footer-column">
+                        <h4>Legal</h4>
+                        <a href="#">Privacy Policy</a>
+                        <a href="#">Terms of Service</a>
+                        <a href="#">Cookie Policy</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2024 BannerSpace. All rights reserved.</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-discord"></i></a>
+                    <a href="#"><i class="fab fa-github"></i></a>
+                    <a href="#"><i class="fab fa-telegram"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
