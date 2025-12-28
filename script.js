@@ -1,103 +1,4 @@
-// Banner Upload Functionality
-function initializeBannerUpload() {
-    const uploadInput = document.getElementById('bannerUpload');
-    const uploadArea = document.getElementById('bannerUploadArea');
-    const previewDiv = document.getElementById('bannerPreview');
-    const previewImage = document.getElementById('previewImage');
-    
-    if (!uploadInput) return;
-    
-    // Click to upload
-    uploadArea.addEventListener('click', function(e) {
-        if (e.target.tagName !== 'BUTTON') {
-            uploadInput.click();
-        }
-    });
-    
-    // File input change
-    uploadInput.addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (file) {
-            handleBannerUpload(file);
-        }
-    });
-    
-    // Drag and drop
-    uploadArea.addEventListener('dragover', function(e) {
-        e.preventDefault();
-        uploadArea.classList.add('dragover');
-    });
-    
-    uploadArea.addEventListener('dragleave', function() {
-        uploadArea.classList.remove('dragover');
-    });
-    
-    uploadArea.addEventListener('drop', function(e) {
-        e.preventDefault();
-        uploadArea.classList.remove('dragover');
-        
-        const file = e.dataTransfer.files[0];
-        if (file && file.type.startsWith('image/')) {
-            handleBannerUpload(file);
-        } else {
-            showToast('Please upload an image file', 'error');
-        }
-    });
-}
-
-function handleBannerUpload(file) {
-    // Validate file
-    if (!file.type.startsWith('image/')) {
-        showToast('Please upload an image file', 'error');
-        return;
-    }
-    
-    if (file.size > 5 * 1024 * 1024) { // 5MB limit
-        showToast('File size should be less than 5MB', 'error');
-        return;
-    }
-    
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        const previewImage = document.getElementById('previewImage');
-        const previewDiv = document.getElementById('bannerPreview');
-        const uploadArea = document.getElementById('bannerUploadArea');
-        
-        previewImage.src = e.target.result;
-        previewDiv.style.display = 'block';
-        uploadArea.style.display = 'none';
-        
-        // Store image data for later use
-        window.uploadedBanner = {
-            dataUrl: e.target.result,
-            name: file.name,
-            type: file.type
-        };
-    };
-    
-    reader.readAsDataURL(file);
-}
-
-function removeBanner() {
-    const uploadInput = document.getElementById('bannerUpload');
-    const previewDiv = document.getElementById('bannerPreview');
-    const uploadArea = document.getElementById('bannerUploadArea');
-    
-    uploadInput.value = '';
-    previewDiv.style.display = 'none';
-    uploadArea.style.display = 'block';
-    window.uploadedBanner = null;
-}
-
-// Call this in initializeApp()
-function initializeApp() {
-    // ... existing code ...
-    
-    // Initialize banner upload
-    initializeBannerUpload();
-    
-    // ... rest of initialization ...
-}// Main JavaScript file for BannerSpace
+// Main JavaScript file for BannerSpace
 // Quick fix: Check for MetaMask connection on page load
 window.addEventListener('load', function() {
     setTimeout(async () => {
@@ -118,6 +19,7 @@ window.addEventListener('load', function() {
         }
     }, 1000);
 });
+
 // Mock data for listings (fallback)
 const mockListings = [
     {
@@ -224,7 +126,6 @@ const mockListings = [
     }
 ];
 
-
 // Save wallet connection state
 function saveWalletState(address) {
     localStorage.setItem('bannerSpace_walletConnected', 'true');
@@ -305,7 +206,13 @@ function initializeApp() {
 
     // Dashboard tabs
     setupDashboardTabs();
- initializeBannerUpload();
+
+    // Banner upload
+    initializeBannerUpload();
+    
+    // Load active rentals for dashboard
+    loadActiveRentals();
+
     // Toast notifications
     window.showToast = showToast;
     
@@ -316,27 +223,129 @@ function initializeApp() {
     initializeBannerSimulation();
 }
 
-// Web3 Integration Functions
-function initializeWeb3Integration() {
-    // Check if web3.js loaded successfully
-    if (typeof window.bannerSpaceWeb3 !== 'undefined') {
-        bannerSpaceWeb3 = window.bannerSpaceWeb3;
-        console.log('Web3 loaded successfully');
-    } else {
-        console.warn('web3.js not loaded, using mock mode');
-    }
+// ===== BANNER UPLOAD FUNCTIONS =====
+function initializeBannerUpload() {
+    const uploadInput = document.getElementById('bannerUpload');
+    const uploadArea = document.getElementById('bannerUploadArea');
+    const previewDiv = document.getElementById('bannerPreview');
+    const previewImage = document.getElementById('previewImage');
     
-    // Update wallet button to open MetaMask modal
-    const walletBtns = document.querySelectorAll('.btn-wallet');
-    walletBtns.forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            if (!btn.id || btn.id === 'connectWallet') {
-                e.preventDefault();
-                openMetamaskModal();
-            }
-        });
+    if (!uploadInput) return;
+    
+    // Click to upload
+    uploadArea.addEventListener('click', function(e) {
+        if (e.target.tagName !== 'BUTTON') {
+            uploadInput.click();
+        }
     });
     
+    // File input change
+    uploadInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            handleBannerUpload(file);
+        }
+    });
+    
+    // Drag and drop
+    uploadArea.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+    });
+    
+    uploadArea.addEventListener('dragleave', function() {
+        uploadArea.classList.remove('dragover');
+    });
+    
+    uploadArea.addEventListener('drop', function(e) {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        
+        const file = e.dataTransfer.files[0];
+        if (file && file.type.startsWith('image/')) {
+            handleBannerUpload(file);
+        } else {
+            showToast('Please upload an image file', 'error');
+        }
+    });
+}
+
+function handleBannerUpload(file) {
+    // Validate file
+    if (!file.type.startsWith('image/')) {
+        showToast('Please upload an image file', 'error');
+        return;
+    }
+    
+    if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        showToast('File size should be less than 5MB', 'error');
+        return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const previewImage = document.getElementById('previewImage');
+        const previewDiv = document.getElementById('bannerPreview');
+        const uploadArea = document.getElementById('bannerUploadArea');
+        
+        previewImage.src = e.target.result;
+        previewDiv.style.display = 'block';
+        uploadArea.style.display = 'none';
+        
+        // Store image data for later use
+        window.uploadedBanner = {
+            dataUrl: e.target.result,
+            name: file.name,
+            type: file.type
+        };
+    };
+    
+    reader.readAsDataURL(file);
+}
+
+function removeBanner() {
+    const uploadInput = document.getElementById('bannerUpload');
+    const previewDiv = document.getElementById('bannerPreview');
+    const uploadArea = document.getElementById('bannerUploadArea');
+    
+    uploadInput.value = '';
+    previewDiv.style.display = 'none';
+    uploadArea.style.display = 'block';
+    window.uploadedBanner = null;
+}
+
+// ===== TWITTER INTEGRATION FUNCTIONS =====
+async function connectTwitter() {
+    try {
+        showToast('Connecting Twitter...', 'warning');
+        
+        if (!bannerSpaceWeb3?.userAddress) {
+            showToast('Please connect wallet first', 'error');
+            return;
+        }
+        
+        // For demo, simulate Twitter connection
+        const twitterHandle = `@user${Math.floor(Math.random() * 1000)}`;
+        
+        // Save to localStorage
+        localStorage.setItem('twitter_handle', twitterHandle);
+        localStorage.setItem('twitter_connected', 'true');
+        
+        // Update UI
+        const twitterBtns = document.querySelectorAll('.btn-twitter');
+        twitterBtns.forEach(btn => {
+            btn.innerHTML = `<i class="fab fa-twitter"></i>${twitterHandle}`;
+        });
+        
+        showToast(`✅ Connected Twitter: ${twitterHandle}`, 'success');
+        
+    } catch (error) {
+        console.error('Twitter connect error:', error);
+        showToast('Twitter connection failed', 'error');
+    }
+}
+
+// ===== LISTING CREATION WITH TWITTER =====
 // Update listing creation to use blockchain
 const submitListingBtn = document.getElementById('submitListing');
 if (submitListingBtn) {
@@ -345,10 +354,16 @@ if (submitListingBtn) {
         
         const dailyPrice = document.getElementById('dailyPrice').value;
         const description = document.getElementById('description').value;
+        const twitterHandle = document.getElementById('twitterHandle')?.value || '@demo_user';
         const bannerData = window.uploadedBanner; // Get uploaded banner
         
         if (!bannerData) {
             showToast('Please upload a banner image', 'error');
+            return;
+        }
+        
+        if (!twitterHandle || !twitterHandle.includes('@')) {
+            showToast('Please enter valid Twitter handle (@username)', 'error');
             return;
         }
         
@@ -359,59 +374,51 @@ if (submitListingBtn) {
         }
         
         try {
-            showTransactionModal('Creating listing with banner...');
+            showTransactionModal('Creating listing...');
             
-            // Store banner locally (for demo)
-            const listingId = Date.now(); // Temporary ID
-            const bannerUrl = bannerData.dataUrl;
-            
-            // Save to localStorage for demo
+            // 1. Store listing data
+            const listingId = Date.now();
             const listingData = {
                 id: listingId,
                 price: parseFloat(dailyPrice),
-                banner: bannerUrl,
+                banner: bannerData.dataUrl,
                 description: description,
+                twitterHandle: twitterHandle,
                 creator: bannerSpaceWeb3.userAddress,
-                createdAt: new Date().toISOString()
+                createdAt: new Date().toISOString(),
+                status: 'active'
             };
             
-            // Save to localStorage
+            // 2. Save to localStorage
             let listings = JSON.parse(localStorage.getItem('bannerSpace_listings') || '[]');
             listings.push(listingData);
             localStorage.setItem('bannerSpace_listings', JSON.stringify(listings));
             
-            // Also try to create on blockchain
-            try {
-                const blockchainListingId = await bannerSpaceWeb3.createListing(dailyPrice);
-                if (blockchainListingId) {
-                    showToast(`Listing #${blockchainListingId} created on blockchain with banner!`, 'success');
-                }
-            } catch (blockchainError) {
-                console.log('Blockchain creation failed, using local:', blockchainError);
-                showToast('Listing created locally with banner!', 'success');
-            }
+            // 3. Show success with Twitter info
+            showToast(`🎯 Listing created for ${twitterHandle}!`, 'success');
             
-            // Close modal and reset
+            // 4. Close modal and reset
             document.getElementById('createModal').classList.remove('active');
             document.body.style.overflow = 'auto';
             document.getElementById('listingForm').reset();
-            removeBanner(); // Clear uploaded banner
+            removeBanner();
             
-            // Refresh listings
+            // 5. Refresh listings
             setTimeout(() => {
                 refreshListingsWithBanners();
             }, 1000);
             
         } catch (error) {
-            console.error('Listing creation error:', error);
+            console.error('Error:', error);
             showToast('Failed to create listing', 'error');
         } finally {
             setTimeout(closeTransactionModal, 2000);
         }
     });
 }
-    
-   // Simple working rent button handler
+
+// ===== ENHANCED RENT FUNCTION WITH BANNER DOWNLOAD =====
+// Simple working rent button handler
 document.addEventListener('click', async function(e) {
     // Check if clicked on Rent Now button
     const button = e.target.closest('.btn-primary');
@@ -433,8 +440,26 @@ document.addEventListener('click', async function(e) {
     const listingId = listingCard.dataset.id;
     const price = listingCard.dataset.price;
     
+    // Get listing data for Twitter handle and banner
+    const allListings = [
+        ...mockListings,
+        ...JSON.parse(localStorage.getItem('bannerSpace_listings') || '[]').map((custom, idx) => ({
+            ...custom,
+            id: 100 + idx
+        }))
+    ];
+    
+    const listing = allListings.find(l => l.id == listingId);
+    const twitterHandle = listing?.twitterHandle || '@demo_user';
+    const bannerUrl = listing?.banner || '';
+    
+    // Show banner download instructions
+    if (bannerUrl) {
+        showBannerInstructions(bannerUrl, twitterHandle, 3, price); // Default 3 days
+    }
+    
     // Show simple prompt
-    const days = prompt(`How many days to rent?\n\nPrice: ${price} ETH/day\n\nEnter 1-30 days:`, '3');
+    const days = prompt(`How many days to rent ${twitterHandle}'s banner?\n\nPrice: ${price} ETH/day\n\nEnter 1-30 days:`, '3');
     
     if (!days || isNaN(days) || days < 1 || days > 30) {
         showToast('Please enter 1-30 days', 'error');
@@ -445,31 +470,46 @@ document.addEventListener('click', async function(e) {
     try {
         showTransactionModal('Starting rental on blockchain...');
         
-        // If Web3 connected, use blockchain
-        if (bannerSpaceWeb3 && bannerSpaceWeb3.isConnected) {
-            const rentalId = await bannerSpaceWeb3.rentBanner(listingId, parseInt(days));
+        // Create rental record
+        const rentalId = Date.now();
+        const rentalData = {
+            id: rentalId,
+            listingId: listingId,
+            twitterHandle: twitterHandle,
+            days: parseInt(days),
+            totalPrice: price * days,
+            bannerUrl: bannerUrl,
+            status: 'pending_verification',
+            startedAt: new Date().toISOString(),
+            endsAt: new Date(Date.now() + (days * 24 * 60 * 60 * 1000)).toISOString()
+        };
+        
+        // Save rental
+        let rentals = JSON.parse(localStorage.getItem('bannerSpace_rentals') || '[]');
+        rentals.push(rentalData);
+        localStorage.setItem('bannerSpace_rentals', JSON.stringify(rentals));
+        
+        // Start verification simulation
+        if (window.twitterVerifier) {
+            window.twitterVerifier.startVerification(rentalId, twitterHandle, days);
+        }
+        
+        showToast(`✅ Rental #${rentalId} started! Upload banner to Twitter.`, 'success');
+        
+        // Simulate verification
+        setTimeout(() => {
+            showToast('🔍 Verifying banner on Twitter...', 'warning');
             
-            if (rentalId) {
-                showToast(`✅ Rental #${rentalId} started!`, 'success');
-                
-                // Simulate verification
-                setTimeout(() => {
-                    showToast('🔍 Verifying banner...', 'warning');
-                    
-                    setTimeout(() => {
-                        showToast('💰 Payment released!', 'success');
-                        closeTransactionModal();
-                    }, 2000);
-                }, 2000);
-            }
-        } else {
-            // Demo mode
-            showToast(`💰 Rented for ${days} days! (Demo Mode)`, 'success');
             setTimeout(() => {
+                showToast('💰 Payment released!', 'success');
                 closeTransactionModal();
                 button.disabled = false;
+                
+                // Update dashboard
+                loadActiveRentals();
             }, 2000);
-        }
+        }, 2000);
+        
     } catch (error) {
         console.error('Rental error:', error);
         showToast('Rental failed: ' + error.message, 'error');
@@ -477,6 +517,402 @@ document.addEventListener('click', async function(e) {
         setTimeout(closeTransactionModal, 1000);
     }
 });
+
+// ===== BANNER DOWNLOAD INSTRUCTIONS MODAL =====
+function showBannerInstructions(bannerUrl, twitterHandle, days, price) {
+    const modal = document.createElement('div');
+    modal.className = 'instructions-modal';
+    
+    modal.innerHTML = `
+        <div class="instructions-content">
+            <button class="close-instructions" onclick="this.parentElement.parentElement.remove()">
+                <i class="fas fa-times"></i>
+            </button>
+            
+            <h2><i class="fab fa-twitter"></i> Banner Upload Instructions</h2>
+            
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h3>Download the Banner</h3>
+                        <div class="banner-preview-small">
+                            <img src="${bannerUrl}" alt="Banner to upload">
+                        </div>
+                        <a href="${bannerUrl}" download="twitter-banner-${twitterHandle}.png" 
+                           class="btn-primary">
+                            <i class="fas fa-download"></i> Download Banner
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h3>Upload to Twitter</h3>
+                        <ol class="instructions-list">
+                            <li>Go to <a href="https://twitter.com/settings/profile" target="_blank">
+                                Twitter Profile Settings
+                            </a></li>
+                            <li>Click "Edit profile"</li>
+                            <li>Click on your current banner</li>
+                            <li>Upload the downloaded image</li>
+                            <li>Click "Apply" then "Save"</li>
+                        </ol>
+                        <p class="note">⚠️ Keep the banner for ${days} days to get paid</p>
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h3>Get Verified & Paid</h3>
+                        <p>Our system automatically checks if the banner is live.</p>
+                        <div class="verification-info">
+                            <div class="info-item">
+                                <i class="fas fa-check-circle"></i>
+                                <span>Checks every 5 minutes</span>
+                            </div>
+                            <div class="info-item">
+                                <i class="fas fa-money-bill-wave"></i>
+                                <span>Earn: ${(price * days).toFixed(4)} ETH</span>
+                            </div>
+                            <div class="info-item">
+                                <i class="fas fa-history"></i>
+                                <span>Duration: ${days} days</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="actions">
+                <button class="btn-secondary" onclick="this.parentElement.parentElement.remove()">
+                    I'll do it later
+                </button>
+                <button class="btn-primary" onclick="window.open('https://twitter.com/settings/profile', '_blank')">
+                    <i class="fab fa-twitter"></i> Go to Twitter Now
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Add CSS if not exists
+    if (!document.querySelector('#instructions-css')) {
+        const style = document.createElement('style');
+        style.id = 'instructions-css';
+        style.textContent = `
+            .instructions-modal {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.9);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 10000;
+                padding: 20px;
+            }
+            .instructions-content {
+                background: white;
+                border-radius: 16px;
+                padding: 30px;
+                max-width: 700px;
+                width: 100%;
+                max-height: 90vh;
+                overflow-y: auto;
+                position: relative;
+            }
+            .close-instructions {
+                position: absolute;
+                top: 15px;
+                right: 15px;
+                background: none;
+                border: none;
+                font-size: 24px;
+                cursor: pointer;
+                color: #6B7280;
+            }
+            .steps {
+                margin: 30px 0;
+            }
+            .step {
+                display: flex;
+                margin-bottom: 30px;
+                align-items: flex-start;
+            }
+            .step-number {
+                background: linear-gradient(135deg, #8B5CF6, #EC4899);
+                color: white;
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: bold;
+                margin-right: 20px;
+                flex-shrink: 0;
+            }
+            .step-content {
+                flex: 1;
+            }
+            .banner-preview-small {
+                max-width: 300px;
+                margin: 15px 0;
+                border-radius: 8px;
+                overflow: hidden;
+                border: 2px solid #E5E7EB;
+            }
+            .banner-preview-small img {
+                width: 100%;
+                height: auto;
+            }
+            .instructions-list {
+                margin: 15px 0;
+                padding-left: 20px;
+            }
+            .instructions-list li {
+                margin: 8px 0;
+            }
+            .note {
+                background: #FEF3C7;
+                padding: 10px;
+                border-radius: 8px;
+                margin: 15px 0;
+                color: #92400E;
+            }
+            .verification-info {
+                background: #F3F4F6;
+                padding: 15px;
+                border-radius: 8px;
+                margin: 15px 0;
+            }
+            .info-item {
+                display: flex;
+                align-items: center;
+                margin: 10px 0;
+            }
+            .info-item i {
+                margin-right: 10px;
+                color: #8B5CF6;
+            }
+            .actions {
+                display: flex;
+                gap: 15px;
+                margin-top: 30px;
+            }
+        `;
+        document.head.appendChild(style);
+    }
+}
+
+// ===== ACTIVE RENTALS DASHBOARD =====
+function loadActiveRentals() {
+    const container = document.getElementById('activeRentals');
+    if (!container) return;
+    
+    const rentals = JSON.parse(localStorage.getItem('bannerSpace_rentals') || '[]');
+    const activeRentals = rentals.filter(r => r.status === 'pending_verification' || r.status === 'active');
+    
+    if (activeRentals.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-bullhorn"></i>
+                <p>No active rentals</p>
+            </div>
+        `;
+        return;
+    }
+    
+    container.innerHTML = '';
+    
+    activeRentals.forEach(rental => {
+        const rentalElement = document.createElement('div');
+        rentalElement.className = 'rental-item';
+        
+        // Calculate progress
+        const start = new Date(rental.startedAt);
+        const end = new Date(rental.endsAt);
+        const now = new Date();
+        const totalMs = end - start;
+        const elapsedMs = now - start;
+        const progress = Math.min(100, (elapsedMs / totalMs) * 100);
+        
+        rentalElement.innerHTML = `
+            <div class="rental-header">
+                <div class="rental-id">Rental #${rental.id}</div>
+                <div class="rental-status ${rental.status}">${rental.status.replace('_', ' ')}</div>
+            </div>
+            
+            <div class="rental-details">
+                <div class="detail">
+                    <i class="fab fa-twitter"></i>
+                    <span>${rental.twitterHandle}</span>
+                </div>
+                <div class="detail">
+                    <i class="fas fa-calendar"></i>
+                    <span>${rental.days} days (${Math.ceil((end - now) / (1000 * 60 * 60 * 24))} days left)</span>
+                </div>
+                <div class="detail">
+                    <i class="fas fa-money-bill-wave"></i>
+                    <span>${rental.totalPrice} ETH</span>
+                </div>
+            </div>
+            
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: ${progress}%"></div>
+            </div>
+            
+            <div class="rental-actions">
+                <button class="btn-outline" onclick="showBannerInstructions('${rental.bannerUrl}', '${rental.twitterHandle}', ${rental.days}, ${rental.totalPrice / rental.days})">
+                    <i class="fas fa-download"></i> Get Banner
+                </button>
+                <button class="btn-outline" onclick="checkVerificationNow(${rental.id})">
+                    <i class="fas fa-sync"></i> Check Now
+                </button>
+            </div>
+        `;
+        
+        container.appendChild(rentalElement);
+    });
+}
+
+// Verification check function
+function checkVerificationNow(rentalId) {
+    showToast('Checking verification status...', 'warning');
+    
+    // Simulate verification check
+    setTimeout(() => {
+        const isVerified = Math.random() > 0.3; // 70% success rate
+        if (isVerified) {
+            showToast('✅ Banner verified! Payment processing...', 'success');
+            
+            // Update rental status
+            const rentals = JSON.parse(localStorage.getItem('bannerSpace_rentals') || '[]');
+            const rentalIndex = rentals.findIndex(r => r.id === rentalId);
+            if (rentalIndex > -1) {
+                rentals[rentalIndex].status = 'completed';
+                localStorage.setItem('bannerSpace_rentals', JSON.stringify(rentals));
+                loadActiveRentals();
+            }
+        } else {
+            showToast('❌ Banner not found. Make sure it\'s uploaded to Twitter.', 'error');
+        }
+    }, 2000);
+}
+
+// ===== ENHANCED LISTING CARD WITH TWITTER =====
+function createListingCard(listing) {
+    const card = document.createElement('div');
+    card.className = 'listing-card fade-in';
+    card.dataset.id = listing.id;
+    card.dataset.price = listing.price;
+    
+    const badgeClass = listing.status === 'verified' ? 'verified-badge' : 'pending-badge';
+    const badgeText = listing.status === 'verified' ? 'Verified' : 'Pending';
+    
+    // Check if listing has custom banner
+    const hasCustomBanner = listing.banner && listing.banner.startsWith('data:image');
+    const bannerContent = hasCustomBanner 
+        ? `<img src="${listing.banner}" alt="Banner" style="width: 100%; height: 150px; object-fit: cover;">`
+        : `<div class="banner-text">
+              <h4>Available Space</h4>
+              <p>1500×500 pixels</p>
+           </div>`;
+    
+    // Twitter badge
+    const twitterBadge = listing.twitterHandle 
+        ? `<div class="twitter-badge">
+              <i class="fab fa-twitter"></i> ${listing.twitterHandle}
+           </div>`
+        : '';
+    
+    card.innerHTML = `
+        <div class="listing-header">
+            <div class="listing-creator">
+                <div class="creator-avatar">
+                    <img src="${listing.creator.image}" alt="${listing.creator.name}">
+                </div>
+                <div class="creator-info">
+                    <h4>${listing.creator.name}</h4>
+                    <div class="creator-handle">${listing.creator.handle}</div>
+                    ${twitterBadge}
+                </div>
+            </div>
+            <div class="${badgeClass}">${badgeText}</div>
+        </div>
+        
+        <div class="listing-stats">
+            <div class="stat-item">
+                <div class="stat-label-small">Followers</div>
+                <div class="stat-value-small">${listing.stats.followers}</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label-small">CTR</div>
+                <div class="stat-value-small">${listing.stats.ctr}</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label-small">Impressions</div>
+                <div class="stat-value-small">${listing.stats.impressions}</div>
+            </div>
+        </div>
+        
+        <div class="listing-banner">
+            ${bannerContent}
+        </div>
+        
+        <div class="listing-footer">
+            <div class="price-info">
+                <div class="price-label">Daily Rate</div>
+                <div class="price-value gradient-text">${listing.price} ETH</div>
+            </div>
+            <div class="listing-actions">
+                <button class="btn-outline" onclick="previewListing(${listing.id})">
+                    <i class="fas fa-external-link-alt"></i>
+                    Preview
+                </button>
+                <button class="btn-primary">
+                    <i class="fas fa-check-circle"></i>
+                    Rent Now
+                </button>
+            </div>
+        </div>
+    `;
+    
+    return card;
+}
+
+// ===== REST OF YOUR EXISTING FUNCTIONS (Keep these as is) =====
+function initializeWeb3Integration() {
+    // Check if web3.js loaded successfully
+    if (typeof window.bannerSpaceWeb3 !== 'undefined') {
+        bannerSpaceWeb3 = window.bannerSpaceWeb3;
+        console.log('Web3 loaded successfully');
+    } else {
+        console.warn('web3.js not loaded, using mock mode');
+    }
+    
+    // Update wallet button to open MetaMask modal
+    const walletBtns = document.querySelectorAll('.btn-wallet');
+    walletBtns.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            if (!btn.id || btn.id === 'connectWallet') {
+                e.preventDefault();
+                openMetamaskModal();
+            }
+        });
+    });
+    
+    // Update Connect Twitter buttons
+    const twitterBtns = document.querySelectorAll('.btn-twitter');
+    twitterBtns.forEach(btn => {
+        btn.addEventListener('click', connectTwitter);
+    });
     
     // Try to load real listings from blockchain on page load
     setTimeout(() => {
@@ -667,78 +1103,6 @@ function loadFeaturedListings(container) {
     refreshListingsWithBanners();
 }
 
-function createListingCard(listing) {
-    const card = document.createElement('div');
-    card.className = 'listing-card fade-in';
-    card.dataset.id = listing.id;
-    card.dataset.price = listing.price;
-    
-    const badgeClass = listing.status === 'verified' ? 'verified-badge' : 'pending-badge';
-    const badgeText = listing.status === 'verified' ? 'Verified' : 'Pending';
-    
-    // Check if listing has custom banner
-    const hasCustomBanner = listing.banner && listing.banner.startsWith('data:image');
-    const bannerContent = hasCustomBanner 
-        ? `<img src="${listing.banner}" alt="Banner" style="width: 100%; height: 150px; object-fit: cover;">`
-        : `<div class="banner-text">
-              <h4>Available Space</h4>
-              <p>1500×500 pixels</p>
-           </div>`;
-    
-    card.innerHTML = `
-        <div class="listing-header">
-            <div class="listing-creator">
-                <div class="creator-avatar">
-                    <img src="${listing.creator.image}" alt="${listing.creator.name}">
-                </div>
-                <div class="creator-info">
-                    <h4>${listing.creator.name}</h4>
-                    <div class="creator-handle">${listing.creator.handle}</div>
-                </div>
-            </div>
-            <div class="${badgeClass}">${badgeText}</div>
-        </div>
-        
-        <div class="listing-stats">
-            <div class="stat-item">
-                <div class="stat-label-small">Followers</div>
-                <div class="stat-value-small">${listing.stats.followers}</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-label-small">CTR</div>
-                <div class="stat-value-small">${listing.stats.ctr}</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-label-small">Impressions</div>
-                <div class="stat-value-small">${listing.stats.impressions}</div>
-            </div>
-        </div>
-        
-        <div class="listing-banner">
-            ${bannerContent}
-        </div>
-        
-        <div class="listing-footer">
-            <div class="price-info">
-                <div class="price-label">Daily Rate</div>
-                <div class="price-value gradient-text">${listing.price} ETH</div>
-            </div>
-            <div class="listing-actions">
-                <button class="btn-outline" onclick="previewListing(${listing.id})">
-                    <i class="fas fa-external-link-alt"></i>
-                    Preview
-                </button>
-                <button class="btn-primary">
-                    <i class="fas fa-check-circle"></i>
-                    Rent Now
-                </button>
-            </div>
-        </div>
-    `;
-    
-    return card;
-}
-
 // Filter functionality
 function setupFilterChips() {
     const filterChips = document.querySelectorAll('.filter-chip');
@@ -910,11 +1274,40 @@ function switchDashboardTab(tab) {
     showToast(`Switched to ${tab} tab`, 'success');
 }
 
-// Listing actions
+// Listing preview
 function previewListing(listingId) {
-    const listing = mockListings.find(l => l.id === listingId);
+    // Find the listing
+    const allListings = [
+        ...mockListings,
+        ...JSON.parse(localStorage.getItem('bannerSpace_listings') || '[]').map((custom, idx) => ({
+            ...custom,
+            id: 100 + idx
+        }))
+    ];
+    
+    const listing = allListings.find(l => l.id === listingId);
+    
     if (listing) {
-        showToast(`Previewing ${listing.creator.handle}'s banner`, 'success');
+        if (listing.banner && listing.banner.startsWith('data:image')) {
+            // Show full banner preview
+            const previewModal = document.createElement('div');
+            previewModal.className = 'preview-modal';
+            previewModal.innerHTML = `
+                <div class="preview-content">
+                    <button class="close-preview" onclick="this.parentElement.parentElement.remove()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <h3>Banner Preview</h3>
+                    <div class="full-banner">
+                        <img src="${listing.banner}" alt="Banner Preview">
+                    </div>
+                    <p>Price: ${listing.price} ETH/day • Twitter: ${listing.twitterHandle || 'Not specified'}</p>
+                </div>
+            `;
+            document.body.appendChild(previewModal);
+        } else {
+            showToast(`Previewing ${listing.creator?.handle || 'creator'}'s banner`, 'success');
+        }
     }
 }
 
@@ -965,27 +1358,7 @@ function simulateVerificationUpdate() {
 // Run verification updates every 10 seconds (for demo purposes)
 setInterval(simulateVerificationUpdate, 10000);
 
-// Global functions for HTML onclick
-window.connectMetamask = connectMetamask;
-window.openMetamaskModal = openMetamaskModal;
-window.closeMetamaskModal = closeMetamaskModal;
-window.showTransactionModal = showTransactionModal;
-window.closeTransactionModal = closeTransactionModal;
-window.previewListing = previewListing;
-window.removeBanner = removeBanner;
-// Auto-initialize when web3.js loads
-window.addEventListener('load', function() {
-    if (typeof BannerSpaceWeb3 !== 'undefined' && !bannerSpaceWeb3) {
-        bannerSpaceWeb3 = new BannerSpaceWeb3();
-        window.bannerSpaceWeb3 = bannerSpaceWeb3;
-        console.log('Web3 auto-initialized');
-    }
-});
-
-
-// ... your existing code ...
-
-// ===== ADD THIS FUNCTION AT THE BOTTOM =====
+// ===== REFRESH LISTINGS WITH BANNERS =====
 function refreshListingsWithBanners() {
     const listingsGrid = document.getElementById('listingsGrid');
     const featuredListings = document.getElementById('featuredListings');
@@ -1016,6 +1389,7 @@ function refreshListingsWithBanners() {
             },
             price: custom.price,
             banner: custom.banner,
+            twitterHandle: custom.twitterHandle || '@user',
             status: 'verified'
         };
         allListings.unshift(customListing);
@@ -1043,4 +1417,23 @@ function refreshListingsWithBanners() {
     initializeBannerSimulation();
 }
 
-// ... existing global functions ...
+// ===== GLOBAL FUNCTIONS =====
+window.connectMetamask = connectMetamask;
+window.openMetamaskModal = openMetamaskModal;
+window.closeMetamaskModal = closeMetamaskModal;
+window.showTransactionModal = showTransactionModal;
+window.closeTransactionModal = closeTransactionModal;
+window.previewListing = previewListing;
+window.removeBanner = removeBanner;
+window.connectTwitter = connectTwitter;
+window.showBannerInstructions = showBannerInstructions;
+window.checkVerificationNow = checkVerificationNow;
+
+// Auto-initialize when web3.js loads
+window.addEventListener('load', function() {
+    if (typeof BannerSpaceWeb3 !== 'undefined' && !bannerSpaceWeb3) {
+        bannerSpaceWeb3 = new BannerSpaceWeb3();
+        window.bannerSpaceWeb3 = bannerSpaceWeb3;
+        console.log('Web3 auto-initialized');
+    }
+});
