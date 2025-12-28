@@ -1435,7 +1435,7 @@ function setupModals() {
     if (cancelModalBtn && createModal) {
         cancelModalBtn.addEventListener('click', function() {
             createModal.classList.remove('active');
-            document.body.style.overflow = 'auto');
+            document.body.style.overflow = 'auto';
         });
     }
     
