@@ -1,0 +1,17 @@
+{
+  "name": "bannerspace-verification",
+  "version": "1.0.0",
+  "description": "Twitter verification server for BannerSpace - No .env needed!",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": ["twitter", "verification", "banner", "blockchain"],
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5"
+  }
+}
