@@ -1,4 +1,103 @@
-// Main JavaScript file for BannerSpace
+// Banner Upload Functionality
+function initializeBannerUpload() {
+    const uploadInput = document.getElementById('bannerUpload');
+    const uploadArea = document.getElementById('bannerUploadArea');
+    const previewDiv = document.getElementById('bannerPreview');
+    const previewImage = document.getElementById('previewImage');
+    
+    if (!uploadInput) return;
+    
+    // Click to upload
+    uploadArea.addEventListener('click', function(e) {
+        if (e.target.tagName !== 'BUTTON') {
+            uploadInput.click();
+        }
+    });
+    
+    // File input change
+    uploadInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            handleBannerUpload(file);
+        }
+    });
+    
+    // Drag and drop
+    uploadArea.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+    });
+    
+    uploadArea.addEventListener('dragleave', function() {
+        uploadArea.classList.remove('dragover');
+    });
+    
+    uploadArea.addEventListener('drop', function(e) {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        
+        const file = e.dataTransfer.files[0];
+        if (file && file.type.startsWith('image/')) {
+            handleBannerUpload(file);
+        } else {
+            showToast('Please upload an image file', 'error');
+        }
+    });
+}
+
+function handleBannerUpload(file) {
+    // Validate file
+    if (!file.type.startsWith('image/')) {
+        showToast('Please upload an image file', 'error');
+        return;
+    }
+    
+    if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        showToast('File size should be less than 5MB', 'error');
+        return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const previewImage = document.getElementById('previewImage');
+        const previewDiv = document.getElementById('bannerPreview');
+        const uploadArea = document.getElementById('bannerUploadArea');
+        
+        previewImage.src = e.target.result;
+        previewDiv.style.display = 'block';
+        uploadArea.style.display = 'none';
+        
+        // Store image data for later use
+        window.uploadedBanner = {
+            dataUrl: e.target.result,
+            name: file.name,
+            type: file.type
+        };
+    };
+    
+    reader.readAsDataURL(file);
+}
+
+function removeBanner() {
+    const uploadInput = document.getElementById('bannerUpload');
+    const previewDiv = document.getElementById('bannerPreview');
+    const uploadArea = document.getElementById('bannerUploadArea');
+    
+    uploadInput.value = '';
+    previewDiv.style.display = 'none';
+    uploadArea.style.display = 'block';
+    window.uploadedBanner = null;
+}
+
+// Call this in initializeApp()
+function initializeApp() {
+    // ... existing code ...
+    
+    // Initialize banner upload
+    initializeBannerUpload();
+    
+    // ... rest of initialization ...
+}// Main JavaScript file for BannerSpace
 // Quick fix: Check for MetaMask connection on page load
 window.addEventListener('load', function() {
     setTimeout(async () => {
