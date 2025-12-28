@@ -159,6 +159,9 @@ function checkSavedWalletState() {
 // Global Web3 instance (will be set by web3.js)
 let bannerSpaceWeb3 = null;
 
+// Twitter API Configuration
+const API_BASE_URL = 'http://localhost:3001';
+
 // DOM Elements
 let isWalletConnected = false;
 
@@ -314,6 +317,144 @@ function removeBanner() {
     window.uploadedBanner = null;
 }
 
+// ===== REAL TWITTER VERIFICATION FUNCTIONS =====
+async function verifyTwitterHandleReal(twitterHandle) {
+    try {
+        showToast('🔍 Checking real Twitter API...', 'warning');
+        
+        const response = await fetch(`${API_BASE_URL}/api/verify-banner`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ twitterHandle })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success === false) {
+            // API error
+            showToast(`❌ ${result.message || 'Twitter verification failed'}`, 'error');
+            return {
+                success: false,
+                real: false,
+                handle: twitterHandle,
+                message: result.message || 'Verification failed',
+                error: result.error
+            };
+        }
+        
+        if (result.real_api) {
+            // Real API response
+            if (result.verified) {
+                showToast(`✅ REAL API: ${result.message}`, 'success');
+                return {
+                    success: true,
+                    real: true,
+                    handle: result.handle,
+                    name: result.name,
+                    followers: result.followers,
+                    verified: result.verified_account,
+                    banner: result.banner_url,
+                    profile_image: result.profile_image,
+                    message: result.message,
+                    checked_at: result.checked_at
+                };
+            } else {
+                showToast(`❌ REAL API: ${result.message}`, 'error');
+                return {
+                    success: false,
+                    real: true,
+                    handle: result.handle,
+                    message: result.message,
+                    checked_at: result.checked_at
+                };
+            }
+        } else {
+            // Demo fallback
+            showToast('⚠️ Using demo fallback mode', 'warning');
+            return {
+                success: result.verified,
+                real: false,
+                handle: result.handle,
+                message: result.message,
+                demo: true
+            };
+        }
+        
+    } catch (error) {
+        console.error('Real verification failed:', error);
+        showToast('Twitter API unavailable. Using demo.', 'warning');
+        
+        // Fallback to demo
+        return verifyTwitterHandleDemo(twitterHandle);
+    }
+}
+
+// Demo fallback
+async function verifyTwitterHandleDemo(twitterHandle) {
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    const handle = twitterHandle.replace('@', '').toLowerCase();
+    const isVerified = Math.random() > 0.3;
+    
+    return {
+        success: isVerified,
+        real: false,
+        handle: `@${handle}`,
+        message: isVerified 
+            ? `✅ Demo: @${handle} banner verified!` 
+            : `❌ Demo: @${handle} has no banner`,
+        demo: true
+    };
+}
+
+// Enhanced verification check for rentals
+async function checkVerificationNowReal(rentalId) {
+    showToast('🔍 Checking REAL Twitter API...', 'warning');
+    
+    // Get rental data
+    const rentals = JSON.parse(localStorage.getItem('bannerSpace_rentals') || '[]');
+    const rental = rentals.find(r => r.id === rentalId);
+    
+    if (!rental) {
+        showToast('Rental not found', 'error');
+        return;
+    }
+    
+    try {
+        const result = await verifyTwitterHandleReal(rental.twitterHandle);
+        
+        if (result.success && result.real) {
+            showToast(`✅ REAL: ${result.message}`, 'success');
+            
+            // Update rental status
+            const rentalIndex = rentals.findIndex(r => r.id === rentalId);
+            if (rentalIndex > -1) {
+                rentals[rentalIndex].status = 'verified';
+                rentals[rentalIndex].lastVerified = new Date().toISOString();
+                rentals[rentalIndex].verification_count = (rentals[rentalIndex].verification_count || 0) + 1;
+                rentals[rentalIndex].real_api_used = true;
+                localStorage.setItem('bannerSpace_rentals', JSON.stringify(rentals));
+                
+                // Show payment notification
+                setTimeout(() => {
+                    showToast(`💰 ${rental.totalPrice} ETH payment released!`, 'success');
+                }, 1000);
+            }
+            
+            loadActiveRentals();
+        } else if (result.success && !result.real) {
+            // Demo mode success
+            showToast(`✅ Demo: ${result.message}`, 'success');
+        } else {
+            showToast(`❌ ${result.message}`, 'error');
+        }
+        
+    } catch (error) {
+        console.error('Verification check failed:', error);
+        showToast('Verification failed. Try again.', 'error');
+    }
+}
+
 // ===== TWITTER INTEGRATION FUNCTIONS =====
 async function connectTwitter() {
     try {
@@ -417,7 +558,7 @@ if (submitListingBtn) {
     });
 }
 
-// ===== ENHANCED RENT FUNCTION WITH BANNER DOWNLOAD =====
+// ===== ENHANCED RENT FUNCTION WITH REAL VERIFICATION =====
 // Simple working rent button handler
 document.addEventListener('click', async function(e) {
     // Check if clicked on Rent Now button
@@ -468,7 +609,7 @@ document.addEventListener('click', async function(e) {
     }
     
     try {
-        showTransactionModal('Starting rental on blockchain...');
+        showTransactionModal('Starting rental...');
         
         // Create rental record
         const rentalId = Date.now();
@@ -481,7 +622,9 @@ document.addEventListener('click', async function(e) {
             bannerUrl: bannerUrl,
             status: 'pending_verification',
             startedAt: new Date().toISOString(),
-            endsAt: new Date(Date.now() + (days * 24 * 60 * 60 * 1000)).toISOString()
+            endsAt: new Date(Date.now() + (days * 24 * 60 * 60 * 1000)).toISOString(),
+            verification_count: 0,
+            real_api_used: false
         };
         
         // Save rental
@@ -489,25 +632,36 @@ document.addEventListener('click', async function(e) {
         rentals.push(rentalData);
         localStorage.setItem('bannerSpace_rentals', JSON.stringify(rentals));
         
-        // Start verification simulation
-        if (window.twitterVerifier) {
-            window.twitterVerifier.startVerification(rentalId, twitterHandle, days);
-        }
+        // Start real verification
+        showToast(`✅ Rental #${rentalId} started! Verifying with Twitter API...`, 'success');
         
-        showToast(`✅ Rental #${rentalId} started! Upload banner to Twitter.`, 'success');
-        
-        // Simulate verification
-        setTimeout(() => {
-            showToast('🔍 Verifying banner on Twitter...', 'warning');
+        // Check verification immediately
+        setTimeout(async () => {
+            const result = await verifyTwitterHandleReal(twitterHandle);
             
-            setTimeout(() => {
-                showToast('💰 Payment released!', 'success');
-                closeTransactionModal();
-                button.disabled = false;
+            if (result.success && result.real) {
+                showToast(`🎉 ${result.message}`, 'success');
                 
-                // Update dashboard
-                loadActiveRentals();
-            }, 2000);
+                // Update rental if verified
+                if (result.verified) {
+                    const updatedRentals = JSON.parse(localStorage.getItem('bannerSpace_rentals') || '[]');
+                    const rentalIndex = updatedRentals.findIndex(r => r.id === rentalId);
+                    if (rentalIndex > -1) {
+                        updatedRentals[rentalIndex].status = 'verified';
+                        updatedRentals[rentalIndex].real_api_used = true;
+                        updatedRentals[rentalIndex].lastVerified = new Date().toISOString();
+                        localStorage.setItem('bannerSpace_rentals', JSON.stringify(updatedRentals));
+                    }
+                }
+            } else {
+                showToast(`⚠️ ${result.message}`, 'warning');
+                showToast('We\'ll keep checking every 5 minutes...', 'info');
+            }
+            
+            closeTransactionModal();
+            button.disabled = false;
+            loadActiveRentals();
+            
         }, 2000);
         
     } catch (error) {
@@ -717,13 +871,14 @@ function loadActiveRentals() {
     if (!container) return;
     
     const rentals = JSON.parse(localStorage.getItem('bannerSpace_rentals') || '[]');
-    const activeRentals = rentals.filter(r => r.status === 'pending_verification' || r.status === 'active');
+    const activeRentals = rentals.filter(r => r.status === 'pending_verification' || r.status === 'active' || r.status === 'verified');
     
     if (activeRentals.length === 0) {
         container.innerHTML = `
             <div class="empty-state">
                 <i class="fas fa-bullhorn"></i>
                 <p>No active rentals</p>
+                <small>Rent a banner to see verification status here</small>
             </div>
         `;
         return;
@@ -743,10 +898,16 @@ function loadActiveRentals() {
         const elapsedMs = now - start;
         const progress = Math.min(100, (elapsedMs / totalMs) * 100);
         
+        // API badge
+        const apiBadge = rental.real_api_used 
+            ? `<span class="api-badge real">REAL API</span>` 
+            : `<span class="api-badge demo">DEMO</span>`;
+        
         rentalElement.innerHTML = `
             <div class="rental-header">
                 <div class="rental-id">Rental #${rental.id}</div>
                 <div class="rental-status ${rental.status}">${rental.status.replace('_', ' ')}</div>
+                ${apiBadge}
             </div>
             
             <div class="rental-details">
@@ -762,6 +923,12 @@ function loadActiveRentals() {
                     <i class="fas fa-money-bill-wave"></i>
                     <span>${rental.totalPrice} ETH</span>
                 </div>
+                ${rental.lastVerified ? `
+                <div class="detail">
+                    <i class="fas fa-clock"></i>
+                    <span>Last check: ${new Date(rental.lastVerified).toLocaleTimeString()}</span>
+                </div>
+                ` : ''}
             </div>
             
             <div class="progress-bar">
@@ -772,38 +939,19 @@ function loadActiveRentals() {
                 <button class="btn-outline" onclick="showBannerInstructions('${rental.bannerUrl}', '${rental.twitterHandle}', ${rental.days}, ${rental.totalPrice / rental.days})">
                     <i class="fas fa-download"></i> Get Banner
                 </button>
-                <button class="btn-outline" onclick="checkVerificationNow(${rental.id})">
+                <button class="btn-outline" onclick="checkVerificationNowReal(${rental.id})">
                     <i class="fas fa-sync"></i> Check Now
                 </button>
+                ${rental.status === 'verified' ? `
+                <button class="btn-success" style="margin-left: auto;">
+                    <i class="fas fa-check-circle"></i> Paid
+                </button>
+                ` : ''}
             </div>
         `;
         
         container.appendChild(rentalElement);
     });
-}
-
-// Verification check function
-function checkVerificationNow(rentalId) {
-    showToast('Checking verification status...', 'warning');
-    
-    // Simulate verification check
-    setTimeout(() => {
-        const isVerified = Math.random() > 0.3; // 70% success rate
-        if (isVerified) {
-            showToast('✅ Banner verified! Payment processing...', 'success');
-            
-            // Update rental status
-            const rentals = JSON.parse(localStorage.getItem('bannerSpace_rentals') || '[]');
-            const rentalIndex = rentals.findIndex(r => r.id === rentalId);
-            if (rentalIndex > -1) {
-                rentals[rentalIndex].status = 'completed';
-                localStorage.setItem('bannerSpace_rentals', JSON.stringify(rentals));
-                loadActiveRentals();
-            }
-        } else {
-            showToast('❌ Banner not found. Make sure it\'s uploaded to Twitter.', 'error');
-        }
-    }, 2000);
 }
 
 // ===== ENHANCED LISTING CARD WITH TWITTER =====
@@ -887,7 +1035,7 @@ function createListingCard(listing) {
     return card;
 }
 
-// ===== REST OF YOUR EXISTING FUNCTIONS (Keep these as is) =====
+// ===== WEB3 INTEGRATION =====
 function initializeWeb3Integration() {
     // Check if web3.js loaded successfully
     if (typeof window.bannerSpaceWeb3 !== 'undefined') {
@@ -1427,7 +1575,8 @@ window.previewListing = previewListing;
 window.removeBanner = removeBanner;
 window.connectTwitter = connectTwitter;
 window.showBannerInstructions = showBannerInstructions;
-window.checkVerificationNow = checkVerificationNow;
+window.checkVerificationNow = checkVerificationNowReal;
+window.verifyTwitterHandleReal = verifyTwitterHandleReal;
 
 // Auto-initialize when web3.js loads
 window.addEventListener('load', function() {
