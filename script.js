@@ -1,4 +1,6 @@
-// Main JavaScript file for BannerSpace
+// Main JavaScript file for BannerSpace with Browser-Based Twitter API
+// ====== COMPLETELY UPDATED FOR GITHUB PAGES ======
+
 // Quick fix: Check for MetaMask connection on page load
 window.addEventListener('load', function() {
     setTimeout(async () => {
@@ -126,43 +128,21 @@ const mockListings = [
     }
 ];
 
-// Save wallet connection state
-function saveWalletState(address) {
-    localStorage.setItem('bannerSpace_walletConnected', 'true');
-    localStorage.setItem('bannerSpace_walletAddress', address);
-    localStorage.setItem('bannerSpace_lastConnection', Date.now());
-}
-
-// Clear wallet state
-function clearWalletState() {
-    localStorage.removeItem('bannerSpace_walletConnected');
-    localStorage.removeItem('bannerSpace_walletAddress');
-    localStorage.removeItem('bannerSpace_lastConnection');
-}
-
-// Check saved wallet state
-function checkSavedWalletState() {
-    const isConnected = localStorage.getItem('bannerSpace_walletConnected');
-    const address = localStorage.getItem('bannerSpace_walletAddress');
-    const lastConnection = localStorage.getItem('bannerSpace_lastConnection');
+// ===== TWITTER API CONFIGURATION =====
+// Using CORS proxy to bypass browser restrictions
+const TWITTER_API_CONFIG = {
+    BEARER_TOKEN: 'AAAAAAAAAAAAAAAAAAAAALM26gEAAAAA6URlJy9muueQZAvVTf3ywNunQVY%3DMF3XLqpG0D6duG9D4x2f7BJyllGFwzOh5FKMxHupYO4EYbEVZP',
     
-    // If connection was less than 5 minutes ago, try to reconnect
-    if (isConnected === 'true' && address && lastConnection) {
-        const fiveMinutesAgo = Date.now() - (5 * 60 * 1000);
-        if (parseInt(lastConnection) > fiveMinutesAgo) {
-            return address;
-        }
-    }
-    return null;
-}
+    // CORS proxies (free services)
+    PROXIES: [
+        'https://api.allorigins.win/get?url=',
+        'https://corsproxy.io/?',
+        'https://api.codetabs.com/v1/proxy?quest='
+    ]
+};
 
-// Global Web3 instance (will be set by web3.js)
+// Global Web3 instance
 let bannerSpaceWeb3 = null;
-
-// Twitter API Configuration
-const API_BASE_URL = 'http://localhost:3001';
-
-// DOM Elements
 let isWalletConnected = false;
 
 // Initialize when DOM is loaded
@@ -171,6 +151,8 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function initializeApp() {
+    console.log('🚀 Initializing BannerSpace (GitHub Pages Edition)...');
+    
     // Mobile menu toggle
     const menuToggle = document.getElementById('menuToggle');
     const mobileMenu = document.getElementById('mobileMenu');
@@ -184,13 +166,13 @@ function initializeApp() {
         });
     }
 
-    // Wallet connection (updated for Web3)
+    // Wallet connection
     const connectWalletBtn = document.getElementById('connectWallet');
     if (connectWalletBtn) {
         connectWalletBtn.addEventListener('click', openMetamaskModal);
     }
 
-    // Load listings on marketplace page
+    // Load listings
     const listingsGrid = document.getElementById('listingsGrid');
     if (listingsGrid) {
         loadListings(listingsGrid);
@@ -198,7 +180,7 @@ function initializeApp() {
         setupSearch();
     }
 
-    // Load featured listings on homepage
+    // Load featured listings
     const featuredListings = document.getElementById('featuredListings');
     if (featuredListings) {
         loadFeaturedListings(featuredListings);
@@ -213,7 +195,7 @@ function initializeApp() {
     // Banner upload
     initializeBannerUpload();
     
-    // Load active rentals for dashboard
+    // Load active rentals
     loadActiveRentals();
 
     // Toast notifications
@@ -224,25 +206,175 @@ function initializeApp() {
     
     // Banner simulation
     initializeBannerSimulation();
+    
+    // Initialize Twitter connection buttons
+    const twitterBtns = document.querySelectorAll('.btn-twitter');
+    twitterBtns.forEach(btn => {
+        btn.addEventListener('click', connectTwitter);
+    });
+    
+    // Initialize submit listing button
+    const submitListingBtn = document.getElementById('submitListing');
+    if (submitListingBtn) {
+        submitListingBtn.addEventListener('click', createListingWithTwitter);
+    }
+}
+
+// ===== REAL TWITTER API (BROWSER VERSION) =====
+async function verifyTwitterHandleReal(twitterHandle) {
+    try {
+        showToast('🔍 Checking real Twitter API...', 'warning');
+        
+        const handle = twitterHandle.replace('@', '').trim();
+        
+        // Try multiple CORS proxies until one works
+        for (const proxy of TWITTER_API_CONFIG.PROXIES) {
+            try {
+                const twitterURL = `https://api.twitter.com/2/users/by/username/${handle}?user.fields=profile_banner_url,profile_image_url,public_metrics,verified,description`;
+                const proxyURL = proxy + encodeURIComponent(twitterURL);
+                
+                const response = await fetch(proxyURL, {
+                    headers: {
+                        'Authorization': `Bearer ${TWITTER_API_CONFIG.BEARER_TOKEN}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) continue; // Try next proxy
+                
+                const result = await response.json();
+                
+                // Handle different proxy response formats
+                let userData;
+                if (proxy.includes('allorigins.win')) {
+                    userData = JSON.parse(result.contents);
+                } else {
+                    userData = result;
+                }
+                
+                const user = userData.data;
+                
+                if (!user) {
+                    return {
+                        success: false,
+                        real: true,
+                        handle: `@${handle}`,
+                        message: `❌ Twitter account @${handle} not found`
+                    };
+                }
+                
+                const hasBanner = !!user.profile_banner_url;
+                const followers = user.public_metrics?.followers_count || 0;
+                
+                console.log(`✅ Real API success! @${handle}: ${hasBanner ? 'Has banner' : 'No banner'} (${followers} followers)`);
+                
+                return {
+                    success: hasBanner,
+                    real: true,
+                    handle: `@${handle}`,
+                    name: user.name || handle,
+                    followers: followers,
+                    verified_account: user.verified || false,
+                    banner_url: user.profile_banner_url,
+                    profile_image: user.profile_image_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${handle}`,
+                    message: hasBanner 
+                        ? `✅ REAL API: @${handle} has banner (${followers.toLocaleString()} followers)!` 
+                        : `❌ REAL API: @${handle} has no banner`
+                };
+                
+            } catch (proxyError) {
+                console.log(`Proxy ${proxy} failed, trying next...`);
+                continue;
+            }
+        }
+        
+        // If all proxies fail, use demo mode
+        throw new Error('All CORS proxies failed');
+        
+    } catch (error) {
+        console.log('Real API failed, using demo mode:', error.message);
+        return verifyTwitterHandleDemo(twitterHandle);
+    }
+}
+
+// Demo fallback
+async function verifyTwitterHandleDemo(twitterHandle) {
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    const handle = twitterHandle.replace('@', '').toLowerCase();
+    const isVerified = Math.random() > 0.3; // 70% success rate
+    
+    return {
+        success: isVerified,
+        real: false,
+        handle: `@${handle}`,
+        message: isVerified 
+            ? `✅ Demo: @${handle} banner verified!` 
+            : `❌ Demo: @${handle} has no banner`,
+        demo: true
+    };
+}
+
+// Enhanced verification check
+async function checkVerificationNowReal(rentalId) {
+    showToast('🔍 Checking REAL Twitter API...', 'warning');
+    
+    // Get rental data
+    const rentals = JSON.parse(localStorage.getItem('bannerSpace_rentals') || '[]');
+    const rental = rentals.find(r => r.id === rentalId);
+    
+    if (!rental) {
+        showToast('Rental not found', 'error');
+        return;
+    }
+    
+    try {
+        const result = await verifyTwitterHandleReal(rental.twitterHandle);
+        
+        if (result.success && result.real) {
+            showToast(`✅ REAL API: ${result.message}`, 'success');
+            
+            // Update rental status
+            const rentalIndex = rentals.findIndex(r => r.id === rentalId);
+            if (rentalIndex > -1) {
+                rentals[rentalIndex].status = 'verified';
+                rentals[rentalIndex].lastVerified = new Date().toISOString();
+                rentals[rentalIndex].verification_count = (rentals[rentalIndex].verification_count || 0) + 1;
+                rentals[rentalIndex].real_api_used = true;
+                localStorage.setItem('bannerSpace_rentals', JSON.stringify(rentals));
+                
+                // Show payment notification
+                setTimeout(() => {
+                    showToast(`💰 ${rental.totalPrice} ETH payment released!`, 'success');
+                }, 1000);
+            }
+            
+            loadActiveRentals();
+        } else if (result.success && !result.real) {
+            showToast(`✅ Demo: ${result.message}`, 'success');
+        } else {
+            showToast(`❌ ${result.message}`, 'error');
+        }
+        
+    } catch (error) {
+        console.error('Verification check failed:', error);
+        showToast('Verification failed. Try again.', 'error');
+    }
 }
 
 // ===== BANNER UPLOAD FUNCTIONS =====
 function initializeBannerUpload() {
     const uploadInput = document.getElementById('bannerUpload');
     const uploadArea = document.getElementById('bannerUploadArea');
-    const previewDiv = document.getElementById('bannerPreview');
-    const previewImage = document.getElementById('previewImage');
     
     if (!uploadInput) return;
     
-    // Click to upload
     uploadArea.addEventListener('click', function(e) {
         if (e.target.tagName !== 'BUTTON') {
             uploadInput.click();
         }
     });
     
-    // File input change
     uploadInput.addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (file) {
@@ -274,13 +406,12 @@ function initializeBannerUpload() {
 }
 
 function handleBannerUpload(file) {
-    // Validate file
     if (!file.type.startsWith('image/')) {
         showToast('Please upload an image file', 'error');
         return;
     }
     
-    if (file.size > 5 * 1024 * 1024) { // 5MB limit
+    if (file.size > 5 * 1024 * 1024) {
         showToast('File size should be less than 5MB', 'error');
         return;
     }
@@ -295,7 +426,6 @@ function handleBannerUpload(file) {
         previewDiv.style.display = 'block';
         uploadArea.style.display = 'none';
         
-        // Store image data for later use
         window.uploadedBanner = {
             dataUrl: e.target.result,
             name: file.name,
@@ -317,145 +447,7 @@ function removeBanner() {
     window.uploadedBanner = null;
 }
 
-// ===== REAL TWITTER VERIFICATION FUNCTIONS =====
-async function verifyTwitterHandleReal(twitterHandle) {
-    try {
-        showToast('🔍 Checking real Twitter API...', 'warning');
-        
-        const response = await fetch(`${API_BASE_URL}/api/verify-banner`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ twitterHandle })
-        });
-        
-        const result = await response.json();
-        
-        if (result.success === false) {
-            // API error
-            showToast(`❌ ${result.message || 'Twitter verification failed'}`, 'error');
-            return {
-                success: false,
-                real: false,
-                handle: twitterHandle,
-                message: result.message || 'Verification failed',
-                error: result.error
-            };
-        }
-        
-        if (result.real_api) {
-            // Real API response
-            if (result.verified) {
-                showToast(`✅ REAL API: ${result.message}`, 'success');
-                return {
-                    success: true,
-                    real: true,
-                    handle: result.handle,
-                    name: result.name,
-                    followers: result.followers,
-                    verified: result.verified_account,
-                    banner: result.banner_url,
-                    profile_image: result.profile_image,
-                    message: result.message,
-                    checked_at: result.checked_at
-                };
-            } else {
-                showToast(`❌ REAL API: ${result.message}`, 'error');
-                return {
-                    success: false,
-                    real: true,
-                    handle: result.handle,
-                    message: result.message,
-                    checked_at: result.checked_at
-                };
-            }
-        } else {
-            // Demo fallback
-            showToast('⚠️ Using demo fallback mode', 'warning');
-            return {
-                success: result.verified,
-                real: false,
-                handle: result.handle,
-                message: result.message,
-                demo: true
-            };
-        }
-        
-    } catch (error) {
-        console.error('Real verification failed:', error);
-        showToast('Twitter API unavailable. Using demo.', 'warning');
-        
-        // Fallback to demo
-        return verifyTwitterHandleDemo(twitterHandle);
-    }
-}
-
-// Demo fallback
-async function verifyTwitterHandleDemo(twitterHandle) {
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    const handle = twitterHandle.replace('@', '').toLowerCase();
-    const isVerified = Math.random() > 0.3;
-    
-    return {
-        success: isVerified,
-        real: false,
-        handle: `@${handle}`,
-        message: isVerified 
-            ? `✅ Demo: @${handle} banner verified!` 
-            : `❌ Demo: @${handle} has no banner`,
-        demo: true
-    };
-}
-
-// Enhanced verification check for rentals
-async function checkVerificationNowReal(rentalId) {
-    showToast('🔍 Checking REAL Twitter API...', 'warning');
-    
-    // Get rental data
-    const rentals = JSON.parse(localStorage.getItem('bannerSpace_rentals') || '[]');
-    const rental = rentals.find(r => r.id === rentalId);
-    
-    if (!rental) {
-        showToast('Rental not found', 'error');
-        return;
-    }
-    
-    try {
-        const result = await verifyTwitterHandleReal(rental.twitterHandle);
-        
-        if (result.success && result.real) {
-            showToast(`✅ REAL: ${result.message}`, 'success');
-            
-            // Update rental status
-            const rentalIndex = rentals.findIndex(r => r.id === rentalId);
-            if (rentalIndex > -1) {
-                rentals[rentalIndex].status = 'verified';
-                rentals[rentalIndex].lastVerified = new Date().toISOString();
-                rentals[rentalIndex].verification_count = (rentals[rentalIndex].verification_count || 0) + 1;
-                rentals[rentalIndex].real_api_used = true;
-                localStorage.setItem('bannerSpace_rentals', JSON.stringify(rentals));
-                
-                // Show payment notification
-                setTimeout(() => {
-                    showToast(`💰 ${rental.totalPrice} ETH payment released!`, 'success');
-                }, 1000);
-            }
-            
-            loadActiveRentals();
-        } else if (result.success && !result.real) {
-            // Demo mode success
-            showToast(`✅ Demo: ${result.message}`, 'success');
-        } else {
-            showToast(`❌ ${result.message}`, 'error');
-        }
-        
-    } catch (error) {
-        console.error('Verification check failed:', error);
-        showToast('Verification failed. Try again.', 'error');
-    }
-}
-
-// ===== TWITTER INTEGRATION FUNCTIONS =====
+// ===== TWITTER CONNECTION =====
 async function connectTwitter() {
     try {
         showToast('Connecting Twitter...', 'warning');
@@ -468,11 +460,9 @@ async function connectTwitter() {
         // For demo, simulate Twitter connection
         const twitterHandle = `@user${Math.floor(Math.random() * 1000)}`;
         
-        // Save to localStorage
         localStorage.setItem('twitter_handle', twitterHandle);
         localStorage.setItem('twitter_connected', 'true');
         
-        // Update UI
         const twitterBtns = document.querySelectorAll('.btn-twitter');
         twitterBtns.forEach(btn => {
             btn.innerHTML = `<i class="fab fa-twitter"></i>${twitterHandle}`;
@@ -486,102 +476,98 @@ async function connectTwitter() {
     }
 }
 
-// ===== LISTING CREATION WITH TWITTER =====
-// Update listing creation to use blockchain
-const submitListingBtn = document.getElementById('submitListing');
-if (submitListingBtn) {
-    submitListingBtn.addEventListener('click', async function(e) {
-        e.preventDefault();
+// ===== LISTING CREATION =====
+async function createListingWithTwitter(e) {
+    if (e) e.preventDefault();
+    
+    const dailyPrice = document.getElementById('dailyPrice')?.value;
+    const description = document.getElementById('description')?.value;
+    const twitterHandle = document.getElementById('twitterHandle')?.value || '@demo_user';
+    const bannerData = window.uploadedBanner;
+    
+    if (!bannerData) {
+        showToast('Please upload a banner image', 'error');
+        return;
+    }
+    
+    if (!twitterHandle || !twitterHandle.includes('@')) {
+        showToast('Please enter valid Twitter handle (@username)', 'error');
+        return;
+    }
+    
+    if (!bannerSpaceWeb3 || !bannerSpaceWeb3.isConnected) {
+        showToast('Please connect wallet first!', 'error');
+        openMetamaskModal();
+        return;
+    }
+    
+    try {
+        showTransactionModal('Creating listing...');
         
-        const dailyPrice = document.getElementById('dailyPrice').value;
-        const description = document.getElementById('description').value;
-        const twitterHandle = document.getElementById('twitterHandle')?.value || '@demo_user';
-        const bannerData = window.uploadedBanner; // Get uploaded banner
+        // Verify Twitter handle first
+        const verification = await verifyTwitterHandleReal(twitterHandle);
         
-        if (!bannerData) {
-            showToast('Please upload a banner image', 'error');
-            return;
+        if (!verification.success) {
+            showToast(`⚠️ Warning: ${twitterHandle} has no banner. Listing created anyway.`, 'warning');
         }
         
-        if (!twitterHandle || !twitterHandle.includes('@')) {
-            showToast('Please enter valid Twitter handle (@username)', 'error');
-            return;
-        }
+        // Create listing data
+        const listingId = Date.now();
+        const listingData = {
+            id: listingId,
+            price: parseFloat(dailyPrice),
+            banner: bannerData.dataUrl,
+            description: description,
+            twitterHandle: twitterHandle,
+            creator: bannerSpaceWeb3.userAddress,
+            createdAt: new Date().toISOString(),
+            status: 'active',
+            verified: verification.success
+        };
         
-        if (!bannerSpaceWeb3 || !bannerSpaceWeb3.isConnected) {
-            showToast('Please connect wallet first!', 'error');
-            openMetamaskModal();
-            return;
-        }
+        // Save to localStorage
+        let listings = JSON.parse(localStorage.getItem('bannerSpace_listings') || '[]');
+        listings.push(listingData);
+        localStorage.setItem('bannerSpace_listings', JSON.stringify(listings));
         
-        try {
-            showTransactionModal('Creating listing...');
-            
-            // 1. Store listing data
-            const listingId = Date.now();
-            const listingData = {
-                id: listingId,
-                price: parseFloat(dailyPrice),
-                banner: bannerData.dataUrl,
-                description: description,
-                twitterHandle: twitterHandle,
-                creator: bannerSpaceWeb3.userAddress,
-                createdAt: new Date().toISOString(),
-                status: 'active'
-            };
-            
-            // 2. Save to localStorage
-            let listings = JSON.parse(localStorage.getItem('bannerSpace_listings') || '[]');
-            listings.push(listingData);
-            localStorage.setItem('bannerSpace_listings', JSON.stringify(listings));
-            
-            // 3. Show success with Twitter info
-            showToast(`🎯 Listing created for ${twitterHandle}!`, 'success');
-            
-            // 4. Close modal and reset
-            document.getElementById('createModal').classList.remove('active');
-            document.body.style.overflow = 'auto';
-            document.getElementById('listingForm').reset();
-            removeBanner();
-            
-            // 5. Refresh listings
-            setTimeout(() => {
-                refreshListingsWithBanners();
-            }, 1000);
-            
-        } catch (error) {
-            console.error('Error:', error);
-            showToast('Failed to create listing', 'error');
-        } finally {
-            setTimeout(closeTransactionModal, 2000);
-        }
-    });
+        showToast(`🎯 Listing created for ${twitterHandle}!`, 'success');
+        
+        // Close modal and reset
+        document.getElementById('createModal')?.classList.remove('active');
+        document.body.style.overflow = 'auto';
+        document.getElementById('listingForm')?.reset();
+        removeBanner();
+        
+        // Refresh listings
+        setTimeout(() => {
+            refreshListingsWithBanners();
+        }, 1000);
+        
+    } catch (error) {
+        console.error('Error:', error);
+        showToast('Failed to create listing', 'error');
+    } finally {
+        setTimeout(closeTransactionModal, 2000);
+    }
 }
 
-// ===== ENHANCED RENT FUNCTION WITH REAL VERIFICATION =====
-// Simple working rent button handler
+// ===== RENT FUNCTION =====
 document.addEventListener('click', async function(e) {
-    // Check if clicked on Rent Now button
     const button = e.target.closest('.btn-primary');
     if (!button) return;
     
-    // Check if it's inside a listing card
     const listingCard = button.closest('.listing-card');
     if (!listingCard) return;
     
-    // Check button text contains "Rent"
     if (!button.textContent.includes('Rent')) return;
     
-    // Prevent double-clicks
     if (button.disabled) return;
     button.disabled = true;
-    
-    console.log('Rent Now clicked!');
     
     const listingId = listingCard.dataset.id;
     const price = listingCard.dataset.price;
     
-    // Get listing data for Twitter handle and banner
+    // Get listing data
     const allListings = [
         ...mockListings,
         ...JSON.parse(localStorage.getItem('bannerSpace_listings') || '[]').map((custom, idx) => ({
@@ -596,10 +582,10 @@ document.addEventListener('click', async function(e) {
     
     // Show banner download instructions
     if (bannerUrl) {
-        showBannerInstructions(bannerUrl, twitterHandle, 3, price); // Default 3 days
+        showBannerInstructions(bannerUrl, twitterHandle, 3, price);
     }
     
-    // Show simple prompt
+    // Show prompt for days
     const days = prompt(`How many days to rent ${twitterHandle}'s banner?\n\nPrice: ${price} ETH/day\n\nEnter 1-30 days:`, '3');
     
     if (!days || isNaN(days) || days < 1 || days > 30) {
@@ -632,7 +618,6 @@ document.addEventListener('click', async function(e) {
         rentals.push(rentalData);
         localStorage.setItem('bannerSpace_rentals', JSON.stringify(rentals));
         
-        // Start real verification
         showToast(`✅ Rental #${rentalId} started! Verifying with Twitter API...`, 'success');
         
         // Check verification immediately
@@ -640,15 +625,15 @@ document.addEventListener('click', async function(e) {
             const result = await verifyTwitterHandleReal(twitterHandle);
             
             if (result.success && result.real) {
-                showToast(`🎉 ${result.message}`, 'success');
+                showToast(`🎉 REAL API: ${result.message}`, 'success');
                 
                 // Update rental if verified
-                if (result.verified) {
+                if (result.success) {
                     const updatedRentals = JSON.parse(localStorage.getItem('bannerSpace_rentals') || '[]');
                     const rentalIndex = updatedRentals.findIndex(r => r.id === rentalId);
                     if (rentalIndex > -1) {
                         updatedRentals[rentalIndex].status = 'verified';
-                        updatedRentals[rentalIndex].real_api_used = true;
+                        updatedRentals[rentalIndex].real_api_used = result.real;
                         updatedRentals[rentalIndex].lastVerified = new Date().toISOString();
                         localStorage.setItem('bannerSpace_rentals', JSON.stringify(updatedRentals));
                     }
@@ -672,7 +657,7 @@ document.addEventListener('click', async function(e) {
     }
 });
 
-// ===== BANNER DOWNLOAD INSTRUCTIONS MODAL =====
+// ===== BANNER DOWNLOAD INSTRUCTIONS =====
 function showBannerInstructions(bannerUrl, twitterHandle, days, price) {
     const modal = document.createElement('div');
     modal.className = 'instructions-modal';
@@ -954,7 +939,7 @@ function loadActiveRentals() {
     });
 }
 
-// ===== ENHANCED LISTING CARD WITH TWITTER =====
+// ===== CREATE LISTING CARD =====
 function createListingCard(listing) {
     const card = document.createElement('div');
     card.className = 'listing-card fade-in';
@@ -1035,9 +1020,10 @@ function createListingCard(listing) {
     return card;
 }
 
-// ===== WEB3 INTEGRATION =====
+// ===== REST OF FUNCTIONS (Keep your existing ones with minor updates) =====
+
+// Initialize Web3 integration
 function initializeWeb3Integration() {
-    // Check if web3.js loaded successfully
     if (typeof window.bannerSpaceWeb3 !== 'undefined') {
         bannerSpaceWeb3 = window.bannerSpaceWeb3;
         console.log('Web3 loaded successfully');
@@ -1045,7 +1031,6 @@ function initializeWeb3Integration() {
         console.warn('web3.js not loaded, using mock mode');
     }
     
-    // Update wallet button to open MetaMask modal
     const walletBtns = document.querySelectorAll('.btn-wallet');
     walletBtns.forEach(btn => {
         btn.addEventListener('click', function(e) {
@@ -1056,13 +1041,6 @@ function initializeWeb3Integration() {
         });
     });
     
-    // Update Connect Twitter buttons
-    const twitterBtns = document.querySelectorAll('.btn-twitter');
-    twitterBtns.forEach(btn => {
-        btn.addEventListener('click', connectTwitter);
-    });
-    
-    // Try to load real listings from blockchain on page load
     setTimeout(() => {
         refreshListingsFromBlockchain();
     }, 1000);
@@ -1072,7 +1050,6 @@ async function refreshListingsFromBlockchain() {
     const listingsGrid = document.getElementById('listingsGrid');
     if (!listingsGrid) return;
     
-    // Show loading
     listingsGrid.innerHTML = '<div class="loading"><div class="loading-spinner"></div><p>Loading from blockchain...</p></div>';
     
     try {
@@ -1080,7 +1057,6 @@ async function refreshListingsFromBlockchain() {
             const realListings = await bannerSpaceWeb3.getAllListings();
             
             if (realListings && realListings.length > 0) {
-                // Clear and add real listings
                 listingsGrid.innerHTML = '';
                 
                 realListings.forEach((listing, index) => {
@@ -1107,16 +1083,14 @@ async function refreshListingsFromBlockchain() {
                     listingsGrid.appendChild(listingCard);
                 });
                 
-                // Re-initialize banner simulation for new cards
                 initializeBannerSimulation();
                 return;
             }
         }
     } catch (error) {
-        console.log('Using mock listings (blockchain not available):', error);
+        console.log('Using mock listings:', error);
     }
     
-    // Fallback to mock listings
     loadListings(listingsGrid);
 }
 
@@ -1159,7 +1133,6 @@ function initializeBannerSimulation() {
     });
 }
 
-// Wallet connection
 async function connectMetamask() {
     try {
         if (!bannerSpaceWeb3) {
@@ -1173,7 +1146,6 @@ async function connectMetamask() {
             closeMetamaskModal();
             showToast('Connected to Sepolia!', 'success');
             
-            // Refresh listings
             refreshListingsFromBlockchain();
         }
     } catch (error) {
@@ -1196,7 +1168,6 @@ function updateUIForConnectedWallet() {
     
     isWalletConnected = true;
     
-    // Update network info
     const networkInfo = document.getElementById('networkInfo');
     if (networkInfo) {
         networkInfo.style.display = 'block';
@@ -1240,7 +1211,6 @@ function closeTransactionModal() {
     }
 }
 
-// Load listings
 function loadListings(container) {
     if (!container) return;
     refreshListingsWithBanners();
@@ -1251,7 +1221,6 @@ function loadFeaturedListings(container) {
     refreshListingsWithBanners();
 }
 
-// Filter functionality
 function setupFilterChips() {
     const filterChips = document.querySelectorAll('.filter-chip');
     const listingsGrid = document.getElementById('listingsGrid');
@@ -1260,9 +1229,7 @@ function setupFilterChips() {
     
     filterChips.forEach(chip => {
         chip.addEventListener('click', function() {
-            // Remove active class from all chips
             filterChips.forEach(c => c.classList.remove('active'));
-            // Add active class to clicked chip
             this.classList.add('active');
             
             const filter = this.dataset.filter;
@@ -1287,7 +1254,6 @@ function filterListings(filter, container) {
         case 'available':
             filteredListings = mockListings.filter((_, index) => index % 2 === 0);
             break;
-        // 'all' shows all listings
     }
     
     container.innerHTML = '';
@@ -1296,11 +1262,9 @@ function filterListings(filter, container) {
         container.appendChild(listingCard);
     });
     
-    // Re-initialize banner simulation
     setTimeout(initializeBannerSimulation, 100);
 }
 
-// Search functionality
 function setupSearch() {
     const searchInput = document.getElementById('searchInput');
     const listingsGrid = document.getElementById('listingsGrid');
@@ -1325,13 +1289,11 @@ function setupSearch() {
                 listingsGrid.appendChild(listingCard);
             });
             
-            // Re-initialize banner simulation
             setTimeout(initializeBannerSimulation, 100);
         });
     }
 }
 
-// Modal functionality
 function setupModals() {
     const createModal = document.getElementById('createModal');
     const createListingBtn = document.getElementById('createListingBtn');
@@ -1361,7 +1323,7 @@ function setupModals() {
         });
     }
     
-    // Create Ad Modal (simulated)
+    // Create Ad Modal
     if (createAdBtn) {
         createAdBtn.addEventListener('click', function() {
             showToast('Redirecting to ad creation...', 'warning');
@@ -1378,7 +1340,7 @@ function setupModals() {
         });
     }
     
-    // Close metamask modal when clicking outside
+    // Close metamask modal
     const metamaskModal = document.getElementById('metamaskModal');
     if (metamaskModal) {
         metamaskModal.addEventListener('click', function(e) {
@@ -1388,7 +1350,7 @@ function setupModals() {
         });
     }
     
-    // Close transaction modal when clicking outside
+    // Close transaction modal
     const transactionModal = document.getElementById('transactionModal');
     if (transactionModal) {
         transactionModal.addEventListener('click', function(e) {
@@ -1399,15 +1361,12 @@ function setupModals() {
     }
 }
 
-// Dashboard tabs
 function setupDashboardTabs() {
     const tabBtns = document.querySelectorAll('.tab-btn');
     
     tabBtns.forEach(btn => {
         btn.addEventListener('click', function() {
-            // Remove active class from all tabs
             tabBtns.forEach(t => t.classList.remove('active'));
-            // Add active class to clicked tab
             this.classList.add('active');
             
             const tab = this.dataset.tab;
@@ -1417,14 +1376,10 @@ function setupDashboardTabs() {
 }
 
 function switchDashboardTab(tab) {
-    // In a real app, this would load different content
-    // For demo, we'll just show a toast
     showToast(`Switched to ${tab} tab`, 'success');
 }
 
-// Listing preview
 function previewListing(listingId) {
-    // Find the listing
     const allListings = [
         ...mockListings,
         ...JSON.parse(localStorage.getItem('bannerSpace_listings') || '[]').map((custom, idx) => ({
@@ -1437,7 +1392,6 @@ function previewListing(listingId) {
     
     if (listing) {
         if (listing.banner && listing.banner.startsWith('data:image')) {
-            // Show full banner preview
             const previewModal = document.createElement('div');
             previewModal.className = 'preview-modal';
             previewModal.innerHTML = `
@@ -1464,65 +1418,39 @@ function showToast(message, type = 'success') {
     const toast = document.getElementById('toast');
     
     if (!toast) {
-        // Create toast if doesn't exist
         const toastDiv = document.createElement('div');
         toastDiv.id = 'toast';
         toastDiv.className = 'toast';
         document.body.appendChild(toastDiv);
-        return showToast(message, type); // Retry
+        return showToast(message, type);
     }
     
-    // Set message and type
     toast.textContent = message;
     toast.className = 'toast';
     toast.classList.add(type);
     
-    // Show toast
     setTimeout(() => {
         toast.classList.add('show');
     }, 10);
     
-    // Hide after 4 seconds
     setTimeout(() => {
         toast.classList.remove('show');
     }, 4000);
 }
 
-// Simulate live verification updates
-function simulateVerificationUpdate() {
-    if (Math.random() > 0.7) { // 30% chance to show update
-        const messages = [
-            'Banner verified: @web3builder is live!',
-            'Payment released: 0.001 ETH to @cryptoguru',
-            'New listing available: @defidev at 0.00075 ETH/day',
-            'Verification complete: All banners active'
-        ];
-        
-        const randomMessage = messages[Math.floor(Math.random() * messages.length)];
-        showToast(randomMessage, 'success');
-    }
-}
-
-// Run verification updates every 10 seconds (for demo purposes)
-setInterval(simulateVerificationUpdate, 10000);
-
-// ===== REFRESH LISTINGS WITH BANNERS =====
+// Refresh listings with banners
 function refreshListingsWithBanners() {
     const listingsGrid = document.getElementById('listingsGrid');
     const featuredListings = document.getElementById('featuredListings');
     
     if (!listingsGrid && !featuredListings) return;
     
-    // Get custom listings from localStorage
     const customListings = JSON.parse(localStorage.getItem('bannerSpace_listings') || '[]');
-    
-    // Combine with mock listings
     let allListings = [...mockListings];
     
-    // Add custom listings
     customListings.forEach((custom, index) => {
         const customListing = {
-            id: 100 + index, // Start from 100 to avoid conflicts
+            id: 100 + index,
             creator: {
                 name: 'You',
                 handle: `@${bannerSpaceWeb3?.userAddress?.slice(0, 8) || 'user'}`,
@@ -1543,7 +1471,6 @@ function refreshListingsWithBanners() {
         allListings.unshift(customListing);
     });
     
-    // Clear and reload listings grid
     if (listingsGrid) {
         listingsGrid.innerHTML = '';
         allListings.forEach(listing => {
@@ -1552,7 +1479,6 @@ function refreshListingsWithBanners() {
         });
     }
     
-    // Clear and reload featured listings
     if (featuredListings) {
         featuredListings.innerHTML = '';
         allListings.slice(0, 3).forEach(listing => {
@@ -1561,7 +1487,6 @@ function refreshListingsWithBanners() {
         });
     }
     
-    // Re-initialize banner simulation
     initializeBannerSimulation();
 }
 
@@ -1577,6 +1502,7 @@ window.connectTwitter = connectTwitter;
 window.showBannerInstructions = showBannerInstructions;
 window.checkVerificationNow = checkVerificationNowReal;
 window.verifyTwitterHandleReal = verifyTwitterHandleReal;
+window.createListingWithTwitter = createListingWithTwitter;
 
 // Auto-initialize when web3.js loads
 window.addEventListener('load', function() {
