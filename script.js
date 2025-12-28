@@ -305,7 +305,7 @@ function initializeApp() {
 
     // Dashboard tabs
     setupDashboardTabs();
-
+ initializeBannerUpload();
     // Toast notifications
     window.showToast = showToast;
     
@@ -337,46 +337,79 @@ function initializeWeb3Integration() {
         });
     });
     
-    // Update listing creation to use blockchain
-    const submitListingBtn = document.getElementById('submitListing');
-    if (submitListingBtn) {
-        submitListingBtn.addEventListener('click', async function(e) {
-            e.preventDefault();
+// Update listing creation to use blockchain
+const submitListingBtn = document.getElementById('submitListing');
+if (submitListingBtn) {
+    submitListingBtn.addEventListener('click', async function(e) {
+        e.preventDefault();
+        
+        const dailyPrice = document.getElementById('dailyPrice').value;
+        const description = document.getElementById('description').value;
+        const bannerData = window.uploadedBanner; // Get uploaded banner
+        
+        if (!bannerData) {
+            showToast('Please upload a banner image', 'error');
+            return;
+        }
+        
+        if (!bannerSpaceWeb3 || !bannerSpaceWeb3.isConnected) {
+            showToast('Please connect wallet first!', 'error');
+            openMetamaskModal();
+            return;
+        }
+        
+        try {
+            showTransactionModal('Creating listing with banner...');
             
-            const dailyPrice = document.getElementById('dailyPrice').value;
-            const description = document.getElementById('description').value;
+            // Store banner locally (for demo)
+            const listingId = Date.now(); // Temporary ID
+            const bannerUrl = bannerData.dataUrl;
             
-            if (!bannerSpaceWeb3 || !bannerSpaceWeb3.isConnected) {
-                showToast('Please connect wallet first!', 'error');
-                openMetamaskModal();
-                return;
-            }
+            // Save to localStorage for demo
+            const listingData = {
+                id: listingId,
+                price: parseFloat(dailyPrice),
+                banner: bannerUrl,
+                description: description,
+                creator: bannerSpaceWeb3.userAddress,
+                createdAt: new Date().toISOString()
+            };
             
+            // Save to localStorage
+            let listings = JSON.parse(localStorage.getItem('bannerSpace_listings') || '[]');
+            listings.push(listingData);
+            localStorage.setItem('bannerSpace_listings', JSON.stringify(listings));
+            
+            // Also try to create on blockchain
             try {
-                showTransactionModal('Creating listing on blockchain...');
-                
-                const listingId = await bannerSpaceWeb3.createListing(dailyPrice);
-                
-                if (listingId) {
-                    showToast(`Listing #${listingId} created on blockchain!`, 'success');
-                    
-                    document.getElementById('createModal').classList.remove('active');
-                    document.body.style.overflow = 'auto';
-                    document.getElementById('listingForm').reset();
-                    
-                    // Refresh listings
-                    setTimeout(() => {
-                        refreshListingsFromBlockchain();
-                    }, 3000);
+                const blockchainListingId = await bannerSpaceWeb3.createListing(dailyPrice);
+                if (blockchainListingId) {
+                    showToast(`Listing #${blockchainListingId} created on blockchain with banner!`, 'success');
                 }
-            } catch (error) {
-                console.error('Listing creation error:', error);
-                showToast('Failed to create listing', 'error');
-            } finally {
-                setTimeout(closeTransactionModal, 2000);
+            } catch (blockchainError) {
+                console.log('Blockchain creation failed, using local:', blockchainError);
+                showToast('Listing created locally with banner!', 'success');
             }
-        });
-    }
+            
+            // Close modal and reset
+            document.getElementById('createModal').classList.remove('active');
+            document.body.style.overflow = 'auto';
+            document.getElementById('listingForm').reset();
+            removeBanner(); // Clear uploaded banner
+            
+            // Refresh listings
+            setTimeout(() => {
+                refreshListingsWithBanners();
+            }, 1000);
+            
+        } catch (error) {
+            console.error('Listing creation error:', error);
+            showToast('Failed to create listing', 'error');
+        } finally {
+            setTimeout(closeTransactionModal, 2000);
+        }
+    });
+}
     
     // Update rent buttons to use blockchain
     document.addEventListener('click', async function(e) {
@@ -617,33 +650,12 @@ function closeTransactionModal() {
 // Load listings
 function loadListings(container) {
     if (!container) return;
-    
-    container.innerHTML = '';
-    
-    mockListings.forEach(listing => {
-        const listingCard = createListingCard(listing);
-        container.appendChild(listingCard);
-    });
-    
-    // Initialize banner simulation
-    setTimeout(initializeBannerSimulation, 100);
+    refreshListingsWithBanners();
 }
 
 function loadFeaturedListings(container) {
     if (!container) return;
-    
-    container.innerHTML = '';
-    
-    // Show only first 3 listings on homepage
-    const featured = mockListings.slice(0, 3);
-    
-    featured.forEach(listing => {
-        const listingCard = createListingCard(listing);
-        container.appendChild(listingCard);
-    });
-    
-    // Initialize banner simulation
-    setTimeout(initializeBannerSimulation, 100);
+    refreshListingsWithBanners();
 }
 
 function createListingCard(listing) {
@@ -651,10 +663,18 @@ function createListingCard(listing) {
     card.className = 'listing-card fade-in';
     card.dataset.id = listing.id;
     card.dataset.price = listing.price;
-    card.dataset.verified = listing.creator.verified;
     
     const badgeClass = listing.status === 'verified' ? 'verified-badge' : 'pending-badge';
     const badgeText = listing.status === 'verified' ? 'Verified' : 'Pending';
+    
+    // Check if listing has custom banner
+    const hasCustomBanner = listing.banner && listing.banner.startsWith('data:image');
+    const bannerContent = hasCustomBanner 
+        ? `<img src="${listing.banner}" alt="Banner" style="width: 100%; height: 150px; object-fit: cover;">`
+        : `<div class="banner-text">
+              <h4>Available Space</h4>
+              <p>1500×500 pixels</p>
+           </div>`;
     
     card.innerHTML = `
         <div class="listing-header">
@@ -686,10 +706,7 @@ function createListingCard(listing) {
         </div>
         
         <div class="listing-banner">
-            <div class="banner-text">
-                <h4>Available Space</h4>
-                <p>1500×500 pixels</p>
-            </div>
+            ${bannerContent}
         </div>
         
         <div class="listing-footer">
@@ -946,7 +963,7 @@ window.closeMetamaskModal = closeMetamaskModal;
 window.showTransactionModal = showTransactionModal;
 window.closeTransactionModal = closeTransactionModal;
 window.previewListing = previewListing;
-
+window.removeBanner = removeBanner;
 // Auto-initialize when web3.js loads
 window.addEventListener('load', function() {
     if (typeof BannerSpaceWeb3 !== 'undefined' && !bannerSpaceWeb3) {
