@@ -972,3 +972,66 @@ window.addEventListener('load', function() {
         console.log('Web3 auto-initialized');
     }
 });
+
+
+// ... your existing code ...
+
+// ===== ADD THIS FUNCTION AT THE BOTTOM =====
+function refreshListingsWithBanners() {
+    const listingsGrid = document.getElementById('listingsGrid');
+    const featuredListings = document.getElementById('featuredListings');
+    
+    if (!listingsGrid && !featuredListings) return;
+    
+    // Get custom listings from localStorage
+    const customListings = JSON.parse(localStorage.getItem('bannerSpace_listings') || '[]');
+    
+    // Combine with mock listings
+    let allListings = [...mockListings];
+    
+    // Add custom listings
+    customListings.forEach((custom, index) => {
+        const customListing = {
+            id: 100 + index, // Start from 100 to avoid conflicts
+            creator: {
+                name: 'You',
+                handle: `@${bannerSpaceWeb3?.userAddress?.slice(0, 8) || 'user'}`,
+                image: 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + (custom.creator || 'user'),
+                followers: '0',
+                verified: true
+            },
+            stats: {
+                followers: '0',
+                ctr: '0%',
+                impressions: '0'
+            },
+            price: custom.price,
+            banner: custom.banner,
+            status: 'verified'
+        };
+        allListings.unshift(customListing);
+    });
+    
+    // Clear and reload listings grid
+    if (listingsGrid) {
+        listingsGrid.innerHTML = '';
+        allListings.forEach(listing => {
+            const listingCard = createListingCard(listing);
+            listingsGrid.appendChild(listingCard);
+        });
+    }
+    
+    // Clear and reload featured listings
+    if (featuredListings) {
+        featuredListings.innerHTML = '';
+        allListings.slice(0, 3).forEach(listing => {
+            const listingCard = createListingCard(listing);
+            featuredListings.appendChild(listingCard);
+        });
+    }
+    
+    // Re-initialize banner simulation
+    initializeBannerSimulation();
+}
+
+// ... existing global functions ...
