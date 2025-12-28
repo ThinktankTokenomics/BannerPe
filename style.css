@@ -1736,3 +1736,75 @@ textarea:focus {
 .fade-in {
     animation: fadeIn 0.6s ease-out forwards;
 }
+
+
+/* API Badges */
+.api-badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.api-badge.real {
+    background: linear-gradient(135deg, #10B981, #059669);
+    color: white;
+}
+
+.api-badge.demo {
+    background: linear-gradient(135deg, #F59E0B, #D97706);
+    color: white;
+}
+
+/* Enhanced rental items */
+.rental-item {
+    background: #F9FAFB;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 15px;
+    border: 1px solid #E5E7EB;
+    position: relative;
+}
+
+.rental-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    gap: 10px;
+}
+
+.rental-id {
+    font-weight: 600;
+    color: #111827;
+    font-size: 16px;
+}
+
+.rental-status {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.rental-status.active, .rental-status.pending_verification {
+    background: #FEF3C7;
+    color: #92400E;
+}
+
+.rental-status.verified {
+    background: #D1FAE5;
+    color: #065F46;
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #10B981, #059669);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: default;
+}
