@@ -344,48 +344,50 @@ async function verifyTwitterHandleSmart(twitterHandle) {
 }
 
 // Enhanced verification check
+// Replace this function in script.js
 async function checkVerificationNowReal(rentalId) {
-    showToast('🔍 Checking Twitter...', 'warning');
-    
-    // Get rental data
-    const rentals = JSON.parse(localStorage.getItem('bannerSpace_rentals') || '[]');
-    const rental = rentals.find(r => r.id === rentalId);
-    
-    if (!rental) {
-        showToast('Rental not found', 'error');
+    if (!bannerSpaceWeb3 || !bannerSpaceWeb3.isConnected) {
+        showToast('Please connect wallet first', 'error');
         return;
     }
-    
+
+    showToast('🔍 Verifying Status...', 'warning');
+
     try {
-        const result = await verifyTwitterHandleReal(rental.twitterHandle);
+        // 1. Get rental info from contract
+        const rental = await bannerSpaceWeb3.contract.rentals(rentalId);
+        const handle = rental.twitterHandle;
+
+        // 2. Check if this is a Special Account on-chain
+        const isSpecial = await bannerSpaceWeb3.contract.specialAccounts(handle);
         
-        if (result.success) {
-            showToast(`✅ ${result.message}`, 'success');
+        // 3. Optional: Real API check from server.js
+        let apiSuccess = false;
+        try {
+            const apiResp = await fetch('http://localhost:3001/api/verify-banner', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ twitterHandle: handle })
+            });
+            const apiResult = await apiResp.json();
+            apiSuccess = apiResult.success;
+        } catch(e) { console.log("API check skipped or failed"); }
+
+        // 4. If special or API passed, trigger contract verification
+        if (isSpecial || apiSuccess) {
+            showToast('✅ Verified! Releasing payment on-chain...', 'success');
+            const proof = isSpecial ? "SPECIAL_ACCOUNT_BYPASS" : "TWITTER_API_VERIFIED";
             
-            // Update rental status
-            const rentalIndex = rentals.findIndex(r => r.id === rentalId);
-            if (rentalIndex > -1) {
-                rentals[rentalIndex].status = 'verified';
-                rentals[rentalIndex].lastVerified = new Date().toISOString();
-                rentals[rentalIndex].verification_count = (rentals[rentalIndex].verification_count || 0) + 1;
-                rentals[rentalIndex].real_api_used = result.real;
-                rentals[rentalIndex].verification_method = result.method;
-                localStorage.setItem('bannerSpace_rentals', JSON.stringify(rentals));
-                
-                // Show payment notification
-                setTimeout(() => {
-                    showToast(`💰 ${rental.totalPrice} ETH payment released!`, 'success');
-                }, 1000);
-            }
+            const tx = await bannerSpaceWeb3.verifyBanner(rentalId, proof);
+            showToast('💰 Transaction confirmed! Payment released.', 'success');
             
-            loadActiveRentals();
+            setTimeout(() => location.reload(), 2000);
         } else {
-            showToast(`❌ ${result.message}`, 'error');
+            showToast(`❌ @${handle} banner not detected yet.`, 'error');
         }
-        
     } catch (error) {
-        console.error('Verification check failed:', error);
-        showToast('Verification failed. Try again.', 'error');
+        console.error("Verification error:", error);
+        showToast('❌ Blockchain error: ' + (error.reason || 'Failed'), 'error');
     }
 }
 
