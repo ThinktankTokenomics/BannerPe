@@ -355,6 +355,609 @@
     </div>
 </div>
 
+    <!-- How It Works Section - Interactive Flow -->
+<section class="how-it-works-flow">
+    <div class="container">
+        <h2 class="section-title">🧩 How BannerSpace Works</h2>
+        <p class="section-subtitle">Transparent, trustless process from start to finish</p>
+        
+        <div class="flow-container">
+            <!-- Step Navigation -->
+            <div class="flow-nav">
+                <button class="flow-nav-btn active" data-step="1">
+                    <span class="step-number">1</span>
+                    <span class="step-title">Influencer Onboarding</span>
+                </button>
+                <div class="flow-arrow">→</div>
+                <button class="flow-nav-btn" data-step="2">
+                    <span class="step-number">2</span>
+                    <span class="step-title">Advertiser Discovery</span>
+                </button>
+                <div class="flow-arrow">→</div>
+                <button class="flow-nav-btn" data-step="3">
+                    <span class="step-number">3</span>
+                    <span class="step-title">Payment & Escrow</span>
+                </button>
+                <div class="flow-arrow">→</div>
+                <button class="flow-nav-btn" data-step="4">
+                    <span class="step-number">4</span>
+                    <span class="step-title">Response Window</span>
+                </button>
+                <div class="flow-arrow">→</div>
+                <button class="flow-nav-btn" data-step="5">
+                    <span class="step-number">5</span>
+                    <span class="step-title">Campaign Execution</span>
+                </button>
+                <div class="flow-arrow">→</div>
+                <button class="flow-nav-btn" data-step="6">
+                    <span class="step-number">6</span>
+                    <span class="step-title">Verification & Settlement</span>
+                </button>
+            </div>
+            
+            <!-- Step Content -->
+            <div class="flow-content">
+                <!-- Step 1 -->
+                <div class="flow-step active" id="step1">
+                    <div class="step-header">
+                        <h3><span class="step-badge">1</span> Influencer Onboarding</h3>
+                        <p class="step-subtitle">Creators connect and list their space</p>
+                    </div>
+                    
+                    <div class="step-grid">
+                        <div class="step-card">
+                            <div class="step-icon">
+                                <i class="fas fa-wallet"></i>
+                            </div>
+                            <h4>Connect Wallet</h4>
+                            <p>Link your crypto wallet (MetaMask, WalletConnect)</p>
+                        </div>
+                        
+                        <div class="step-card">
+                            <div class="step-icon">
+                                <i class="fab fa-twitter"></i>
+                            </div>
+                            <h4>Connect Twitter</h4>
+                            <p>Authorize read-only access to your Twitter account</p>
+                        </div>
+                        
+                        <div class="step-card">
+                            <div class="step-icon">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <h4>Real Engagement Data</h4>
+                            <p>Platform fetches real metrics from Xalpha API</p>
+                            <ul class="metrics-list">
+                                <li>✅ Followers count</li>
+                                <li>✅ Impressions/day</li>
+                                <li>✅ Engagement rate</li>
+                                <li>✅ Verified by oracle</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="step-card">
+                            <div class="step-icon">
+                                <i class="fas fa-tag"></i>
+                            </div>
+                            <h4>Set Pricing & Categories</h4>
+                            <p>List your banner with daily/weekly/monthly rates</p>
+                            <div class="categories">
+                                <span class="category-tag">Crypto</span>
+                                <span class="category-tag">Stocks</span>
+                                <span class="category-tag">Fashion</span>
+                                <span class="category-tag">Tech</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="step-code">
+                        <div class="code-header">
+                            <span>📊 On-chain Data Fetch</span>
+                            <button class="copy-btn" onclick="copyCode('code1')">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                        <pre id="code1">// Fetching real engagement data
+const engagementData = await oracle.fetchTwitterMetrics({
+    handle: "@influencer",
+    metrics: ["followers", "impressions", "engagement"],
+    verified: true  // Cross-verified by Xalpha
+});
+
+// Stored on-chain for transparency
+await contract.setInfluencerMetrics(influencerId, engagementData);</pre>
+                    </div>
+                </div>
+                
+                <!-- Step 2 -->
+                <div class="flow-step" id="step2">
+                    <div class="step-header">
+                        <h3><span class="step-badge">2</span> Advertiser Discovery</h3>
+                        <p class="step-subtitle">Find the perfect influencer for your campaign</p>
+                    </div>
+                    
+                    <div class="step-demo">
+                        <div class="demo-container">
+                            <div class="demo-filters">
+                                <h4>🔍 Search & Filter</h4>
+                                <div class="filter-group">
+                                    <label>Category</label>
+                                    <select>
+                                        <option>Crypto</option>
+                                        <option>Stocks</option>
+                                        <option>Fashion</option>
+                                        <option>Tech</option>
+                                        <option>Gaming</option>
+                                    </select>
+                                </div>
+                                <div class="filter-group">
+                                    <label>Min. Impressions/Day</label>
+                                    <input type="range" min="1000" max="100000" value="10000">
+                                    <span>≥10,000</span>
+                                </div>
+                                <div class="filter-group">
+                                    <label>Verified Only</label>
+                                    <label class="switch">
+                                        <input type="checkbox" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="demo-results">
+                                <h4>📊 Ranked Results</h4>
+                                <div class="result-item">
+                                    <div class="result-rank">#1</div>
+                                    <div class="result-info">
+                                        <strong>@cryptoguru</strong>
+                                        <span>15.2K followers • 51.2K impressions/day</span>
+                                    </div>
+                                    <div class="result-price">0.0025 ETH/day</div>
+                                </div>
+                                <div class="result-item">
+                                    <div class="result-rank">#2</div>
+                                    <div class="result-info">
+                                        <strong>@web3builder</strong>
+                                        <span>12.5K followers • 25.4K impressions/day</span>
+                                    </div>
+                                    <div class="result-price">0.0015 ETH/day</div>
+                                </div>
+                                <div class="result-item">
+                                    <div class="result-rank">#3</div>
+                                    <div class="result-info">
+                                        <strong>@defidev</strong>
+                                        <span>8.7K followers • 18.2K impressions/day</span>
+                                    </div>
+                                    <div class="result-price">0.001 ETH/day</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="step-action">
+                        <div class="action-card">
+                            <h4>📤 Upload Banner</h4>
+                            <p>Advertiser uploads campaign banner (1500×500px)</p>
+                            <div class="banner-upload-demo">
+                                <div class="banner-placeholder">
+                                    <i class="fas fa-image"></i>
+                                    <p>Your Campaign Banner</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="action-card">
+                            <h4>📅 Set Duration</h4>
+                            <p>Choose campaign length (1-30 days)</p>
+                            <div class="duration-selector">
+                                <button class="duration-btn">1 Day</button>
+                                <button class="duration-btn active">3 Days</button>
+                                <button class="duration-btn">7 Days</button>
+                                <button class="duration-btn">30 Days</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Step 3 -->
+                <div class="flow-step" id="step3">
+                    <div class="step-header">
+                        <h3><span class="step-badge">3</span> Payment & Escrow</h3>
+                        <p class="step-subtitle">Trustless payment secured by smart contracts</p>
+                    </div>
+                    
+                    <div class="escrow-visual">
+                        <div class="escrow-step">
+                            <div class="escrow-icon">
+                                <i class="fas fa-money-bill-wave"></i>
+                            </div>
+                            <div class="escrow-content">
+                                <h4>1. Advertiser Pays Upfront</h4>
+                                <p>Total amount = Daily rate × Campaign days</p>
+                                <div class="payment-example">
+                                    <code>0.0015 ETH/day × 7 days = 0.0105 ETH</code>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="escrow-arrow">
+                            <i class="fas fa-arrow-down"></i>
+                        </div>
+                        
+                        <div class="escrow-step">
+                            <div class="escrow-icon">
+                                <i class="fas fa-lock"></i>
+                            </div>
+                            <div class="escrow-content">
+                                <h4>2. Funds Locked in Escrow</h4>
+                                <p>Smart contract becomes its own on-chain address</p>
+                                <div class="contract-address">
+                                    <code>0x985f92759205f2F8AeFE0b85c83Ad9BC73158Fb3</code>
+                                    <small>No human controls the money</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="escrow-arrow">
+                            <i class="fas fa-arrow-down"></i>
+                        </div>
+                        
+                        <div class="escrow-step">
+                            <div class="escrow-icon">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <div class="escrow-content">
+                                <h4>3. Dual Protection</h4>
+                                <div class="protection-grid">
+                                    <div class="protection">
+                                        <i class="fas fa-user-check"></i>
+                                        <div>
+                                            <strong>For Influencer</strong>
+                                            <p>Knows funds exist and are secured</p>
+                                        </div>
+                                    </div>
+                                    <div class="protection">
+                                        <i class="fas fa-clock"></i>
+                                        <div>
+                                            <strong>For Advertiser</strong>
+                                            <p>Money won't be released early</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="step-code">
+                        <div class="code-header">
+                            <span>📜 Smart Contract Escrow</span>
+                            <button class="copy-btn" onclick="copyCode('code3')">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                        <pre id="code3">// BannerSpace Escrow Contract
+contract BannerEscrow {
+    address public advertiser;
+    address public influencer;
+    uint256 public amount;
+    uint256 public campaignEnd;
+    
+    // Funds automatically locked on creation
+    constructor(address _influencer) payable {
+        advertiser = msg.sender;
+        influencer = _influencer;
+        amount = msg.value;
+    }
+    
+    // Only release when oracle verifies completion
+    function releasePayment(bytes memory oracleProof) external {
+        require(block.timestamp >= campaignEnd, "Campaign ongoing");
+        require(verifyOracle(oracleProof), "Invalid verification");
+        
+        // 90% to influencer, 10% platform fee
+        payable(influencer).transfer(amount * 90 / 100);
+        payable(platform).transfer(amount * 10 / 100);
+    }
+    
+    // Automatic refund if influencer rejects/ignores
+    function refundIfNoResponse() external {
+        require(block.timestamp > responseDeadline, "Response period active");
+        payable(advertiser).transfer(amount);
+    }
+}</pre>
+                    </div>
+                </div>
+                
+                <!-- Step 4 -->
+                <div class="flow-step" id="step4">
+                    <div class="step-header">
+                        <h3><span class="step-badge">4</span> Influencer Response Window</h3>
+                        <p class="step-subtitle">24-hour decision period with automatic protections</p>
+                    </div>
+                    
+                    <div class="response-timeline">
+                        <div class="timeline">
+                            <div class="timeline-item">
+                                <div class="timeline-marker accept">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                                <div class="timeline-content">
+                                    <h4>✅ Accept Campaign</h4>
+                                    <p>Influencer accepts → Campaign starts immediately</p>
+                                    <ul>
+                                        <li>Timer begins on blockchain</li>
+                                        <li>Funds remain locked in escrow</li>
+                                        <li>Verification oracle activated</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <div class="timeline-item">
+                                <div class="timeline-marker reject">
+                                    <i class="fas fa-times"></i>
+                                </div>
+                                <div class="timeline-content">
+                                    <h4>❌ Reject Campaign</h4>
+                                    <p>Influencer rejects → Instant automatic refund</p>
+                                    <ul>
+                                        <li>Full refund to advertiser</li>
+                                        <li>No platform fees charged</li>
+                                        <li>Transaction completed in 1 block</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <div class="timeline-item">
+                                <div class="timeline-marker timeout">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                                <div class="timeline-content">
+                                    <h4>⏰ No Response (24h)</h4>
+                                    <p>Automatic refund after deadline</p>
+                                    <div class="countdown">
+                                        <div class="countdown-item">
+                                            <span class="countdown-value">24</span>
+                                            <span class="countdown-label">HOURS</span>
+                                        </div>
+                                        <div class="countdown-separator">:</div>
+                                        <div class="countdown-item">
+                                            <span class="countdown-value">00</span>
+                                            <span class="countdown-label">MINUTES</span>
+                                        </div>
+                                    </div>
+                                    <p class="note">Smart contract automatically processes refund</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Step 5 -->
+                <div class="flow-step" id="step5">
+                    <div class="step-header">
+                        <h3><span class="step-badge">5</span> Campaign Execution & Verification</h3>
+                        <p class="step-subtitle">Automated banner verification using decentralized oracle</p>
+                    </div>
+                    
+                    <div class="verification-flow">
+                        <div class="flow-diagram">
+                            <div class="flow-step">
+                                <div class="flow-number">1</div>
+                                <div class="flow-content">
+                                    <h4>📥 Download & Upload</h4>
+                                    <p>Influencer downloads banner and sets as Twitter header</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flow-arrow">
+                                <i class="fas fa-arrow-right"></i>
+                            </div>
+                            
+                            <div class="flow-step">
+                                <div class="flow-number">2</div>
+                                <div class="flow-content">
+                                    <h4>⏱️ Timer Starts</h4>
+                                    <p>Blockchain timestamp begins campaign countdown</p>
+                                    <div class="timer">
+                                        <div class="timer-progress">
+                                            <div class="timer-fill" style="width: 30%"></div>
+                                        </div>
+                                        <div class="timer-text">Day 2 of 7</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="flow-arrow">
+                                <i class="fas fa-arrow-right"></i>
+                            </div>
+                            
+                            <div class="flow-step">
+                                <div class="flow-number">3</div>
+                                <div class="flow-content">
+                                    <h4>🔍 Oracle Verification Loop</h4>
+                                    <p>Periodic checks using Twitter/X Read APIs</p>
+                                    <div class="check-frequency">
+                                        <i class="fas fa-sync-alt"></i>
+                                        <span>Every 1 hour</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="hash-comparison">
+                            <h4>🔐 Hash Matching Process</h4>
+                            <div class="hash-container">
+                                <div class="hash-box">
+                                    <h5>Original Banner Hash</h5>
+                                    <div class="hash-value">
+                                        <code>0x8f3a9b7c2d...</code>
+                                        <small>SHA-256 of uploaded file</small>
+                                    </div>
+                                    <div class="hash-source">
+                                        <i class="fas fa-upload"></i>
+                                        <span>Stored on-chain as reference</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="hash-comparator">
+                                    <i class="fas fa-equals"></i>
+                                    <div class="comparison-status">
+                                        <span class="status-badge success">MATCH</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="hash-box">
+                                    <h5>Fetched Banner Hash</h5>
+                                    <div class="hash-value">
+                                        <code>0x8f3a9b7c2d...</code>
+                                        <small>SHA-256 of current Twitter header</small>
+                                    </div>
+                                    <div class="hash-source">
+                                        <i class="fab fa-twitter"></i>
+                                        <span>Oracle fetches every hour</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="compression-note">
+                            <div class="note-header">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <h5>Compression Issue & Solution</h5>
+                            </div>
+                            <div class="note-content">
+                                <p><strong>Problem:</strong> Twitter compresses images, changing file hash</p>
+                                <div class="solution">
+                                    <div class="solution-option">
+                                        <span class="solution-badge mvp">MVP</span>
+                                        <strong>Exact File Upload</strong>
+                                        <p>Require influencer to upload exact same file</p>
+                                    </div>
+                                    <div class="solution-option">
+                                        <span class="solution-badge production">Production</span>
+                                        <strong>Perceptual Hashing (pHash)</strong>
+                                        <p>Match based on visual similarity, not exact bytes</p>
+                                        <code>pHash(image1) ≈ pHash(image2)</code>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Step 6 -->
+                <div class="flow-step" id="step6">
+                    <div class="step-header">
+                        <h3><span class="step-badge">6</span> Completion & Settlement</h3>
+                        <p class="step-subtitle">Automatic payouts based on verified performance</p>
+                    </div>
+                    
+                    <div class="settlement-outcomes">
+                        <div class="outcome success">
+                            <div class="outcome-header">
+                                <i class="fas fa-check-circle"></i>
+                                <h4>✅ Campaign Successful</h4>
+                            </div>
+                            <div class="outcome-content">
+                                <p>Banner verified for full duration</p>
+                                <div class="settlement-flow">
+                                    <div class="settlement-step">
+                                        <div class="settlement-icon">
+                                            <i class="fas fa-signature"></i>
+                                        </div>
+                                        <p>Oracle signs verification message</p>
+                                    </div>
+                                    <div class="settlement-arrow">→</div>
+                                    <div class="settlement-step">
+                                        <div class="settlement-icon">
+                                            <i class="fas fa-file-contract"></i>
+                                        </div>
+                                        <p>Smart contract verifies signature</p>
+                                    </div>
+                                    <div class="settlement-arrow">→</div>
+                                    <div class="settlement-step">
+                                        <div class="settlement-icon">
+                                            <i class="fas fa-money-check-alt"></i>
+                                        </div>
+                                        <p>Funds released automatically</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="payout-breakdown">
+                                    <h5>💰 Payout Distribution</h5>
+                                    <div class="payout-item">
+                                        <div class="payout-recipient">
+                                            <i class="fas fa-user-check"></i>
+                                            <span>Influencer</span>
+                                        </div>
+                                        <div class="payout-amount">
+                                            <span class="percentage">90%</span>
+                                            <span class="eth">0.00945 ETH</span>
+                                        </div>
+                                    </div>
+                                    <div class="payout-item">
+                                        <div class="payout-recipient">
+                                            <i class="fas fa-building"></i>
+                                            <span>Platform Fee</span>
+                                        </div>
+                                        <div class="payout-amount">
+                                            <span class="percentage">10%</span>
+                                            <span class="eth">0.00105 ETH</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="outcome warning">
+                            <div class="outcome-header">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <h4>⚠️ Early Removal</h4>
+                            </div>
+                            <div class="outcome-content">
+                                <p>Banner removed before campaign end</p>
+                                <div class="refund-policy">
+                                    <h5>🔁 Partial Payout/Refund Rules</h5>
+                                    <div class="policy-rule">
+                                        <span class="rule-percent">50%</span>
+                                        <div class="rule-desc">
+                                            <strong>Half Campaign Complete</strong>
+                                            <p>Influencer gets 50%, advertiser refunded 50%</p>
+                                        </div>
+                                    </div>
+                                    <div class="policy-rule">
+                                        <span class="rule-percent">25%</span>
+                                        <div class="rule-desc">
+                                            <strong>First Day Only</strong>
+                                            <p>Minimal payout for partial day coverage</p>
+                                        </div>
+                                    </div>
+                                    <div class="policy-rule">
+                                        <span class="rule-percent">100%</span>
+                                        <div class="rule-desc">
+                                            <strong>Immediate Removal</strong>
+                                            <p>Full refund to advertiser</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="final-note">
+                        <div class="note-card">
+                            <i class="fas fa-robot"></i>
+                            <div>
+                                <h4>🤖 Fully Autonomous</h4>
+                                <p>No manual intervention required. Smart contracts handle everything based on oracle verification.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
 <!-- Transaction Modal -->
 <div class="modal" id="transactionModal">
     <div class="modal-content">
