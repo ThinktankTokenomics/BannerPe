@@ -128,6 +128,90 @@ const mockListings = [
     }
 ];
 
+// ===== HOW IT WORKS FLOW INTERACTIVITY =====
+function setupHowItWorksFlow() {
+    const navBtns = document.querySelectorAll('.flow-nav-btn');
+    const steps = document.querySelectorAll('.flow-step');
+    
+    if (navBtns.length === 0) return;
+    
+    // Set initial state
+    showStep(1);
+    
+    // Add click handlers
+    navBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const step = parseInt(this.dataset.step);
+            
+            // Update active nav button
+            navBtns.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            
+            // Show corresponding step
+            showStep(step);
+            
+            // Scroll to top of flow
+            this.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        });
+    });
+    
+    // Auto-advance every 10 seconds (optional)
+    let currentStep = 1;
+    const autoAdvance = setInterval(() => {
+        currentStep = currentStep < 6 ? currentStep + 1 : 1;
+        
+        navBtns.forEach(b => b.classList.remove('active'));
+        navBtns[currentStep - 1].classList.add('active');
+        
+        showStep(currentStep);
+    }, 10000);
+    
+    // Pause auto-advance on hover
+    const flowContainer = document.querySelector('.flow-container');
+    if (flowContainer) {
+        flowContainer.addEventListener('mouseenter', () => clearInterval(autoAdvance));
+    }
+}
+
+function showStep(stepNumber) {
+    // Hide all steps
+    document.querySelectorAll('.flow-step').forEach(step => {
+        step.classList.remove('active');
+    });
+    
+    // Show selected step
+    const stepElement = document.getElementById(`step${stepNumber}`);
+    if (stepElement) {
+        stepElement.classList.add('active');
+        
+        // Add animation
+        stepElement.style.opacity = '0';
+        stepElement.style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+            stepElement.style.transition = 'all 0.5s ease';
+            stepElement.style.opacity = '1';
+            stepElement.style.transform = 'translateY(0)';
+        }, 10);
+    }
+}
+
+// Copy code function
+window.copyCode = function(codeId) {
+    const codeElement = document.getElementById(codeId);
+    if (!codeElement) return;
+    
+    const code = codeElement.textContent;
+    navigator.clipboard.writeText(code).then(() => {
+        showToast('Code copied to clipboard!', 'success');
+    });
+};
+
+// Initialize flow on page load
+if (document.querySelector('.how-it-works-flow')) {
+    document.addEventListener('DOMContentLoaded', setupHowItWorksFlow);
+}
+
 // ===== SMART TWITTER VERIFICATION =====
 // Works on GitHub Pages - Mixed real checks and smart demo
 async function verifyTwitterHandleReal(twitterHandle) {
